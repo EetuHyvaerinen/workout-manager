@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workout Manager</title>
+  <script src="/script.js" defer></script>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <h1>Workout Manager</h1>
+      <div class="header-controls">
+        <a href="workoutmanager/dashboard.html" id="admin-link" class="btn admin-btn">Admin Dashboard</a>
+        <button class="btn danger logout-btn" onclick="logout()">Logout</button>
+      </div>
+    </header>
+    <div class="grid">
+      <div class="left-container">
+        <section id="calendar-section">
+          <div class="workout-calendar">
+            <div class="calendar-weekday">Mon</div>
+            <div class="calendar-weekday">Tue</div>
+            <div class="calendar-weekday">Wed</div>
+            <div class="calendar-weekday">Thu</div>
+            <div class="calendar-weekday">Fri</div>
+            <div class="calendar-weekday">Sat</div>
+            <div class="calendar-weekday">Sun</div>
+          </div>
+          <div class="weekdays">
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+            <div class="calendar-day"></div>
+          </div>
+          <div class="calendar-legend">
+            <span class="legend-item"><span class="dot workout-dot"></span> Completed</span>
+            <span class="legend-item"><span class="dot planned-dot"></span> Planned</span>
+          </div>
+        </section>
+        <section id="create-workout-section">
+          <div class="create-workout-header">Create workout</div>
+          <div class="creation-container">
+            <div class="workout-name-input-group">
+              <input type="text" id="workout-name-input" placeholder="Workout Name">
+            </div>
+            <div id="exercises-container"></div>
+            <form id="exercise-form">
+              <input type="text" id="exercise-name" placeholder="Exercise name" required>
+              <button type="submit">+</button>
+            </form>
+            <div class="create-workout-button-container">
+              <button id="create-workout" class="primary large">Save Workout</button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <section id="workout-list-section">
+        <div id="selected-day-h2"></div>
+        <div id="workouts-list"></div>
+      </section>
+    </div>
+  </div>
+  <div id="custom-modal" class="modal-overlay">
+    <div class="modal-content">
+      <h3>Are you sure?</h3>
+      <p id="modal-message">Do you really want to delete this workout?</p>
+      <div class="modal-actions">
+        <button id="modal-cancel" class="btn">Cancel</button>
+        <button id="modal-confirm" class="btn danger">Delete</button>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

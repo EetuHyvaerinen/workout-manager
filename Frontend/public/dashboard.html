@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Dashboard</title>
+  <script src="/dashboard.js" defer></script>
+  <link rel="stylesheet" href="/styles.css"/>
+</head>
+<body>
+<div id="app">
+  <h1>Admin Dashboard</h1>
+
+  <div id="loading">Loading...</div>
+
+  <div id="dashboard" hidden>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>Total Users</h3>
+        <p id="totalUsers"></p>
+      </div>
+      <div class="stat-card">
+        <h3>Total Workouts</h3>
+        <p id="totalWorkouts"></p>
+      </div>
+      <div class="stat-card">
+        <h3>Active Users (24h)</h3>
+        <p id="activeUsers24h"></p>
+      </div>
+      <div class="stat-card">
+        <h3>Workouts Today</h3>
+        <p id="workoutsToday"></p>
+      </div>
+    </div>
+
+    <div class="server-info">
+      <h2>Server Status</h2>
+      <p id="uptime"></p>
+      <p id="memory"></p>
+      <p id="database"></p>
+      <p id="logQueue"></p>
+      <p id="logDropped"></p>
+    </div>
+
+    <div class="logs-viewer">
+      <h2>Logs</h2>
+      <select id="loggerSelect">
+        <option value="">Loading loggers...</option>
+      </select>
+      <select id="levelSelect">
+        <option value="ALL">All Levels</option>
+        <option value="DEBUG">Debug</option>
+        <option value="INFO">Info</option>
+        <option value="WARN">Warn</option>
+        <option value="ERROR">Error</option>
+      </select>
+      <pre id="logContent" class="log-content"></pre>
+    </div>
+  </div>
+</div>
+</body>
+</html>

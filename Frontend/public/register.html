@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Workout Manager</title>
+    <script src="/auth.js" defer></script>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+</head>
+
+<body>
+    <div class="container auth-container">
+        <section class="form-section">
+            <header>
+                <h1>Workout Manager</h1>
+                <h2>Create Account</h2>
+            </header>
+
+            <form id="register-form">
+                <input type="email" id="email" placeholder="Email" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <div id="error-message" class="error-text"></div>
+                <button type="submit" class="btn primary large">Register</button>
+            </form>
+            <div class="register-container">
+
+                <p>Already have an account? <a href="login.html">Login here</a></p>
+            </div>
+        </section>
+    </div>
+</body>
+
+</html>

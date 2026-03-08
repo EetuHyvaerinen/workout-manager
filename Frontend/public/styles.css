@@ -1,0 +1,760 @@
+:root {
+  --background: #1e1f29;
+  --element-bg: #3a3a44;
+  --field-bg: #FFFFFF0D;
+  --text: #ffffff;
+  --transition: 0.2s ease;
+  --primary: #8b8c9b;
+  --text-muted: #888888;
+  --link: #6c5ce7;
+  --border-radius: 5px;
+  --card-bg: #252836;
+  --text-light: #dddddd;
+  --danger: #ff4a4a;
+  
+  --card-background-1: #303240;
+  --card-background-2: #3a3c49;
+  --card-background-3: #444552;
+
+}
+
+html {
+  font-size: 1.25rem;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: var(--background);
+  color: var(--text);
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+
+header {
+  text-align: center;
+  position: relative;
+  width: 100%;
+}
+
+h1 {
+  color: var(--primary);
+  font-size: 2.5rem;
+}
+
+h2 {
+  font-size: 1rem;
+  color: var(--text);
+  color: var(--text-muted);
+}
+
+label {
+  display: block;
+  color: var(--text-light);
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+input {
+  box-sizing: border-box;
+  background: var(--card-background-3);
+  border: 1px solid transparent;
+  border-radius: var(--border-radius);
+  color: var(--text);
+  transition: var(--transition);
+  height: 35px;
+}
+
+input:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+
+a {
+  color: var(--link);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+a:hover {
+  color: var(--link);
+  text-decoration: underline;
+}
+
+button {
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  color: var(--text);
+  background: var(--primary);
+  transition: var(--transition);
+  padding: 10px 18px;
+}
+
+p {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+section {
+  background: var(--card-bg);
+  padding: 10px 20px 20px 20px;
+  border-radius: 10px;
+  border: 1px solid var(--element-bg);
+  box-sizing: border-box;
+}
+
+.btn.primary.large {
+  width: 50%;
+  padding: 14px;
+  color: var(--text);
+}
+
+.btn:hover {
+  background: #9fa1b2;
+}
+.logout-btn {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+}
+
+.calendar-day.today {
+  text-decoration: underline;
+}
+
+.error-text {
+  color: var(--danger);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.register-container {
+  margin-top: 20px;
+  margin-bottom: -20px;
+}
+
+#register-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+}
+
+#login-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.workout-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  margin-bottom: 10px;
+  gap: 2px;
+  border-bottom: 1px solid var(--element-bg);
+}
+
+.calendar-weekday {
+  padding: 6px 0;
+  color: var(--text);
+}
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.add-set-btn {
+  padding: 10px;
+}
+
+.btn.danger {
+  align-self: flex-start;
+  background: var(--danger);
+}
+
+.set-input-group {
+  display: flex;
+  width: 100%;           /* Forces it to respect parent width */
+  flex-wrap: wrap; /* Prevents pushing the width out */
+  align-items: center;
+    min-width: 0;     /* CRITICAL: allows the input to shrink if needed */
+  gap: 8px;
+}
+
+.set-input-group input {
+flex: 1 1 50px;        /* Grow and shrink, with a small base width */
+  min-width: 0;          /* CRITICAL: Allows flex items to shrink below their content size */
+  width: 0;
+}
+
+.form-section {
+  padding: 40px;
+}
+
+.form-section input {
+  width: 90%;
+}
+
+.set-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px;
+}
+.set-container {
+  display: flex;
+  text-align: center;
+  align-items: center;
+  border-radius: var(--border-radius);
+  padding: 5px;
+}
+
+.set-container.create-workout {
+  display: flex;
+  justify-content: center;
+  border-radius: var(--border-radius);
+  padding: 5px;
+}
+
+.creation-container {
+  display: flex;
+  flex-direction: column;
+  background: var(--field-bg);
+  padding: 15px;
+  border-radius: var(--border-radius);
+  gap: 10px;
+}
+.exercise-number {
+  margin-left: 20px;
+}
+
+.exercises-container {
+  display: flex;
+  flex-grow: 0;
+}
+#exercise-form {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 8px;
+}
+
+#exercise-name {
+  width: 100%;
+}
+
+.exercise-container {
+  border-radius: var(--border-radius);
+  text-align: center;
+}
+
+.exercise-header {
+    display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.delete-set{
+  padding: 6px;
+  margin: 6px;
+}
+
+.calendar-day {
+  border: 1px solid var(--element-bg);
+  border-radius: var(--border-radius);
+  background-color: var(--element-bg);
+  cursor: pointer;
+}
+
+.calendar-day {
+  padding: 10px;
+  aspect-ratio: 1 / 1;
+  background-color: var(--element-bg);
+  border: 1px solid var(--element-bg);
+  border-radius: var(--border-radius);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.calendar-day.workout {
+  border: 2px solid var(--primary);
+}
+
+.calendar-day.empty {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-bg);
+  cursor: default;
+}
+.calendar-day[data-day]:hover {
+  background-color: var(--field-bg);
+}
+
+.calendar-day.workout:hover {
+  background-color: var(--field-bg);
+}
+
+.calendar-day.selected {
+  background-color: var(--primary);
+  color: var(--link);
+
+}
+.calendar-day.selected:hover {
+  background-color: var(--primary);
+}
+
+.calendar-day.workout.selected {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: var(--link);
+}
+.create-workout-button-container {
+  display: flex;
+  justify-content: center;
+}
+
+#workouts-list {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  max-height: 100%;
+  gap: 15px;
+  color: var(--text);
+}
+
+.auth-container {
+  justify-content: center;
+  height: 100vh;
+}
+
+.exercise-info{
+  display: flex;
+  height: fit-content;
+  flex-direction: column;
+  background: var(--field-bg);
+  border-radius: var(--border-radius);
+  padding: 10px;
+  gap: 10px;
+}
+
+
+#workout-name-input {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 8px;
+  padding: 10px;
+}
+
+.workout-name {
+  font-size: 22px;
+}
+
+.locked-workout-name {
+  font-size: 22px;
+}
+
+.create-workout-header {
+  text-align: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--element-bg);
+}
+
+.workout-date {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--element-bg);
+}
+
+.workout-container {
+  background: var(--field-bg);
+}
+
+.grid {
+  display: grid;
+  min-width: 100%;
+  grid-template-columns: max-content max-content; 
+  align-items: flex-start;
+  gap: 24px;
+  width: 95%;
+}
+
+.workout-item {
+  display: flex;
+  width: fit-content;
+  flex-direction: column;
+  background: var(--field-bg);
+  text-align: center;
+  padding: 15px;
+  gap: 10px;
+  border-radius: var(--border-radius);
+}
+
+.workout-name-container {
+  display: flex;
+  width: 100%;
+  flex-direction: row;
+  align-content: center;
+  justify-content: space-between;
+}
+
+.workout-item .danger {
+  align-self: flex-end;
+  margin: 0;
+  padding: 0;
+}
+
+.btn.delete-x {
+  background: inherit;
+  color: var(--danger);
+  align-content: center;
+  padding: 0 14px;
+  cursor: pointer;
+  border: none;
+}
+
+.workout-info {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  border-radius: var(--border-radius);
+}
+.left-container {
+display: flex;
+  flex-direction: column;
+  min-width: 50%;
+  gap: 24px;}
+
+#create-workout-section {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  width: auto;
+  gap: 15px;
+}
+#workout-list-section {
+  display: flex;
+  flex-direction: column;
+  min-width: 50%;
+  gap: 10px;
+}
+
+#create-workout-section.active {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+#selected-day-h2 {
+  text-align: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--element-bg);
+}
+
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: var(--card-bg);
+  padding: 25px;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--element-bg);
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+
+
+
+/* ===== Dashboard Layout ===== */
+
+#app {
+  width: 100%;
+  max-width: 1200px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+#loading {
+  margin-top: 40px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* ===== Stats Grid ===== */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--card-background-1);
+  border: 1px solid var(--element-bg);
+  border-radius: var(--border-radius);
+  padding: 16px;
+  transition: var(--transition);
+}
+
+.stat-card:hover {
+  background: var(--card-background-2);
+}
+
+.stat-card h3 {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.stat-card p {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: var(--text);
+  text-align: left;
+}
+
+/* ===== Server Info ===== */
+
+.server-info {
+  background: var(--card-bg);
+  border: 1px solid var(--element-bg);
+  border-radius: var(--border-radius);
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.server-info h2 {
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.server-info p {
+  margin: 6px 0;
+  text-align: left;
+  color: var(--text-light);
+  font-size: 0.85rem;
+}
+
+/* ===== Logs Viewer ===== */
+
+.logs-viewer {
+  background: var(--card-bg);
+  border: 1px solid var(--element-bg);
+  border-radius: var(--border-radius);
+  padding: 16px;
+}
+
+.logs-viewer h2 {
+  margin-top: 0;
+}
+
+.logs-viewer select {
+  background: var(--card-background-3);
+  color: var(--text);
+  border: 1px solid var(--element-bg);
+  border-radius: var(--border-radius);
+  padding: 6px 10px;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+
+.logs-viewer select:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.log-content {
+  background: var(--background);
+  border: 1px solid var(--element-bg);
+  border-radius: var(--border-radius);
+  padding: 12px;
+  max-height: 320px;
+  overflow-y: auto;
+  font-family: monospace;
+  font-size: 0.7rem;
+  color: var(--text-light);
+  white-space: pre-wrap;
+}
+
+/* ===== Planned Workout Additions ===== */
+
+/* Calendar: Dashed border indicates a day with a plan */
+.calendar-day.planned {
+  border: 2px dashed var(--link);
+  position: relative;
+}
+
+/* Specific styling for when a planned day is selected */
+.calendar-day.planned.selected {
+  background-color: var(--primary);
+  border-style: solid; /* Solid border when active to maintain visibility */
+}
+
+/* Workout list: Subtle background and dashed border for plan cards */
+.workout-item.planned-item {
+  border: 1px dashed var(--link);
+  background: rgba(108, 92, 231, 0.05); /* Very subtle tint using your --link color */
+}
+
+/* Styling for the text within a planned item */
+.workout-item.planned-item .workout-name {
+  color: var(--link);
+  font-style: italic;
+}
+
+/* Target sets styling for planned workouts */
+.workout-item.planned-item .set-container {
+  color: var(--text-light);
+  margin-left: 5px;
+  padding-left: 8px;
+}
+
+/* "Start" button used to convert a plan into an active workout entry */
+.btn.start-plan {
+  background: var(--link);
+  font-size: 0.8rem;
+  padding: 5px 12px;
+  margin-left: 10px;
+}
+
+.btn.start-plan:hover {
+  background: #5b4bc4; /* Slightly darker shade of --link for hover state */
+}
+
+/* Legend for the calendar to explain the status colors */
+.calendar-legend {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  font-size: 0.8rem;
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px solid var(--element-bg);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+}
+
+.dot {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--border-radius); /* Matches card corners */
+}
+
+.workout-dot { 
+  border: 2px solid var(--primary);
+  background: transparent;
+  }
+
+.planned-dot { 
+  border: 2px dashed var(--link);
+  background: transparent;
+}
+
+.workout-item.missed-plan {
+  border: 1px dashed var(--danger);
+  background: rgba(255, 74, 74, 0.05);
+}
+
+.calendar-day.missed {
+  border: 2px dashed var(--danger);
+}
+
+/* Highlighting the name/label in red */
+.workout-item.missed-plan .workout-name, 
+.workout-item.missed-plan .missed-label {
+  color: var(--danger);
+  font-weight: bold;
+}
+
+.reschedule-btn {
+  background: var(--element-bg);
+  color: var(--text-light);
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  border: 1px solid var(--primary);
+}
+
+.reschedule-btn:hover {
+  background: var(--primary);
+  color: var(--text);
+}
+
+.header-controls {
+  position: absolute;
+  top: 10px;
+  right: -10vw;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Reset the specific logout-btn position since it's now in a flex container */
+.logout-btn {
+  position: static; 
+}
+
+#admin-link {
+  display: none; /* Hidden by default, JS will show it */
+  background: var(--element-bg);
+  color: var(--text);
+  padding: 10px;
+  border-radius: var(--border-radius);
+  font-weight: normal; /* Override your global 'a' tag bolding */
+}
+
+#admin-link:hover {
+  background: var(--primary);
+  text-decoration: none; /* Override global 'a:hover' underline */
+}
