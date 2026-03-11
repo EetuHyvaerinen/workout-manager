@@ -31,7 +31,7 @@ The system provides advanced scheduling and tracking features to deliver a compl
 
 Log current or past workouts, plan future sessions, and handle missed workouts with ease
 
-Automatic progressive overloading that automatically progresses based on your performance
+Automatic progressive overloading that applies an increased total load to your next workout plan
 
 ---
 
