@@ -157,7 +157,7 @@ final class LogDispatcher {
 
         LoggerState(FileChannel channel, long fileSize) {
             this.channel  = channel;
-            this.buffer   = ByteBuffer.allocate(BUFFER_SIZE); // heap: allocateDirect offers no benefit at 8 KB
+            this.buffer   = ByteBuffer.allocate(BUFFER_SIZE);
             this.fileSize = fileSize;
         }
 
@@ -173,8 +173,6 @@ final class LogDispatcher {
         return new LoggerState(openChannelWithRetry(loggerName), existingSize);
     }
 
-    // Returns the new timestamp when a flush occurred so the caller can advance
-    // lastFlushTime. A void method mutating a long parameter would have no effect.
     private static long flushAllIfNeeded(Map<String, LoggerState> state, long lastFlushTime)
             throws IOException {
         long now = System.currentTimeMillis();
