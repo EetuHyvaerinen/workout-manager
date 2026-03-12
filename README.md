@@ -2,7 +2,7 @@
 
 A high-performance, dependency-free workout management system featuring a custom Java backend and a dynamic vanilla JavaScript frontend
 
-A live demo is available [here](https://www.hyvaerinen.com/workoutmanager)
+A live demo is available [here](https://www.hyvaerinen.com/workoutmanager/login?email=test@test&pass=testtest)
 
 ---
 
