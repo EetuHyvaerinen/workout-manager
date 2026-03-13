@@ -10,7 +10,7 @@ A live demo is available [here](https://www.hyvaerinen.com/workoutmanager/login?
 
 | Component | Technology |
 |-----------|------------|
-| Runtime | Java 21 |
+| Runtime | Java 25 |
 | Database | MySQL |
 | Frontend | JavaScript, HTML, CSS |
 | API Protocol | REST / JSON |
@@ -19,7 +19,7 @@ A live demo is available [here](https://www.hyvaerinen.com/workoutmanager/login?
 
 ## System Architecture
 
-The backend is built on a custom HTTP server using Java virtual threads for high-throughput, low-latency request handling
+The backend is built on a custom HTTP server using Java virtual threads for high-throughput, low-latency request handling. Utilizes features from new JDK versions like virtual threads, ScopedValue and switch pattern matching
 
 Custom Infrastructure engineered for minimal overhead and zero external dependencies
 
