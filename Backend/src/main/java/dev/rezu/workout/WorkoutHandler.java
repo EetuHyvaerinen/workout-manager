@@ -62,9 +62,10 @@ public class WorkoutHandler extends BaseHandler {
 
         logger.info("Processing workout creation request for user: " + userId + " on path: " + path);
 
-        InputStreamReader reader = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
-        JsonNode jsonNode = JsonReader.parse(reader);
-
+        JsonNode jsonNode;
+        try (InputStreamReader reader = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8)) {
+            jsonNode = JsonReader.parse(reader);
+        }
         if (path.endsWith("/plans/generate")) {
             String sourceId = extractParameter(exchange.getRequestURI().getQuery(), "sourceWorkoutId");
             String planId = workoutService.planNextWorkout(sourceId, userId);

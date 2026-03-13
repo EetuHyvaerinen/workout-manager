@@ -2,6 +2,8 @@ package dev.rezu;
 
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
+import dev.rezu.auth.AuthExtractor;
+import dev.rezu.auth.AuthResult;
 import dev.rezu.auth.Authenticator;
 import dev.rezu.logger.AsyncLogger;
 import dev.rezu.response.ResponseMessage;
@@ -14,6 +16,7 @@ public abstract class BaseHandler implements HttpHandler {
     private static final AsyncLogger logger = AsyncLogger.getLogger(BaseHandler.class);
     private static final Authenticator authenticator = new Authenticator();
     private static final RateLimiter rateLimiter = new RateLimiter();
+    private static final AuthExtractor authExtractor = new AuthExtractor(authenticator);
 
     public record AuthContext(int userId, boolean isAdmin) {}
     public static final ScopedValue<AuthContext> AUTH_CONTEXT = ScopedValue.newInstance();
@@ -22,7 +25,6 @@ public abstract class BaseHandler implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
         long startTime = System.currentTimeMillis();
 
-        System.out.println(exchange.getRequestHeaders());
         exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "http://localhost:8080");
         exchange.getResponseHeaders().set("Access-Control-Allow-Credentials", "true");
         exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS, DELETE");
@@ -38,7 +40,7 @@ public abstract class BaseHandler implements HttpHandler {
             ResponseMessage.send(exchange, 429, ResponseMessageType.ERROR, "Too many requests");
             return;
         }
-        Authenticator.AuthResult authResult = authenticate(exchange);
+        AuthResult authResult = authExtractor.authenticate(exchange);
         int userId = authResult != null ? authResult.userId() : -1;
         boolean isAdmin = authResult != null && authResult.isAdmin();
         AuthContext authContext = new AuthContext(userId, isAdmin);
@@ -109,29 +111,5 @@ public abstract class BaseHandler implements HttpHandler {
 
     public static RateLimiter getRateLimiter() {
         return rateLimiter;
-    }
-
-    private Authenticator.AuthResult authenticate(HttpExchange exchange) {
-        String cookieHeader = exchange.getRequestHeaders().getFirst("Cookie");
-        if (cookieHeader == null || cookieHeader.isEmpty()) return null;
-
-        int tokenIndex = cookieHeader.indexOf("accessToken=");
-        if (tokenIndex == -1) return null;
-
-        int tokenStart = tokenIndex + "accessToken=".length();
-        int tokenEnd = cookieHeader.indexOf(';', tokenStart);
-        String token = (tokenEnd == -1)
-                ? cookieHeader.substring(tokenStart).trim()
-                : cookieHeader.substring(tokenStart, tokenEnd).trim();
-
-        if (token.isEmpty()) return null;
-
-        Authenticator.AuthResult result = authenticator.verifyJwtFull(token);
-        if (result != null && result.userId() > 0) {
-            logger.debug("User authenticated successfully: userId: " + result.userId());
-            return result;
-        }
-        logger.debug("Authentication failed: invalid or expired token");
-        return null;
     }
 }

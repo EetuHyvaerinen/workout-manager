@@ -3,6 +3,7 @@ package dev.rezu.json;
 import dev.rezu.auth.JwtHeader;
 import dev.rezu.auth.JwtPayload;
 import dev.rezu.dashboard.*;
+import dev.rezu.database.DatabasePoolMetrics;
 import dev.rezu.plannedworkout.PlannedWorkout;
 import dev.rezu.user.User;
 import dev.rezu.workout.Exercise;
@@ -24,10 +25,10 @@ public class JsonMapper {
 
     public static boolean writeRecord(JsonWriter writer, Object value) {
         return switch (value) {
-            case Exercise(int id, String wid, String name, int reps, double weight, Instant created, Instant updated) -> {
+            case Exercise(int id, String workoutId, String name, int reps, double weight, Instant created, Instant updated) -> {
                 writer.beginObject()
                         .field("id", id)
-                        .field("workoutId", wid)
+                        .field("workoutId", workoutId)
                         .field("name", name)
                         .field("repetitions", reps)
                         .field("weight", weight)
@@ -55,7 +56,7 @@ public class JsonMapper {
                         .field("name", p.name())
                         .field("activateTime", p.activateTime())
                         .field("status", p.status().name())
-                        .field("exercises", p.exercises()) // Recursively calls Exercise mapping
+                        .field("exercises", p.exercises())
                         .endObject();
                 yield true;
             }
@@ -109,7 +110,7 @@ public class JsonMapper {
                         .endObject();
                 yield true;
             }
-            case SystemStats(var totU, var totW, var totE, var act24, var wToday, var db, var srv, var at) -> {
+            case SystemStats(var totU, var totW, var totE, var act24, var wToday, DatabasePoolMetrics db, var srv, var at) -> {
                 writer.beginObject()
                         .field("totalUsers", totU)
                         .field("totalWorkouts", totW)
@@ -123,14 +124,24 @@ public class JsonMapper {
                 yield true;
             }
 
-            case DatabaseStats(int pSize, int act, int idle, long tot, long timeouts, long valFailed, long totalRecycled, double loadPercentage, boolean healthy) -> {
+            case DatabasePoolMetrics(
+                    int pSize,
+                    int act,
+                    int idle,
+                    long totCreated,
+                    long timeouts,
+                    long valFailed,
+                    long totalRecycled,
+                    boolean healthy,
+                    double loadPercentage
+            ) -> {
                 writer.beginObject()
                         .field("poolSize", pSize)
                         .field("activeConnections", act)
                         .field("idleConnections", idle)
-                        .field("totalConnectionsCreated", tot)
+                        .field("totalConnectionsCreated", totCreated)
                         .field("connectionTimeouts", timeouts)
-                        .field("valFailed", valFailed)
+                        .field("totalValidationsFailed", valFailed)
                         .field("totalRecycled", totalRecycled)
                         .field("loadPercentage", loadPercentage)
                         .field("healthy", healthy)
@@ -155,12 +166,11 @@ public class JsonMapper {
                 yield true;
             }
 
-            case RecentActivity.UserActivity(int uid, String email, String action, Instant ts) -> {
+            case RecentActivity.UserActivity(int uid, String email, String action) -> {
                 writer.beginObject()
                         .field("userId", uid)
                         .field("email", email)
                         .field("action", action)
-                        .field("timestamp", ts)
                         .endObject();
                 yield true;
             }
@@ -176,26 +186,11 @@ public class JsonMapper {
                 yield true;
             }
 
-            case RecentActivity.ErrorActivity(String type, String msg, String endp, Instant ts) -> {
+            case RecentActivity.ErrorActivity(String type, String msg, String endp) -> {
                 writer.beginObject()
                         .field("errorType", type)
                         .field("message", msg)
                         .field("endpoint", endp)
-                        .field("timestamp", ts)
-                        .endObject();
-                yield true;
-            }
-            case GrowthData(var uGrowth, var wTrends) -> {
-                writer.beginObject()
-                        .field("userGrowth", uGrowth)
-                        .field("workoutTrends", wTrends)
-                        .endObject();
-                yield true;
-            }
-            case TimeSeriesData(String date, long val) -> {
-                writer.beginObject()
-                        .field("date", date)
-                        .field("value", val)
                         .endObject();
                 yield true;
             }
@@ -252,8 +247,8 @@ public class JsonMapper {
                 n.integer("id"),
                 n.str("email"),
                 n.str("name"),
-                null, // Salt not usually sent in JSON
-                null, // Hash not usually sent in JSON
+                null,
+                null,
                 n.bool("isAdmin"),
                 n.instant("createdAt")
         );

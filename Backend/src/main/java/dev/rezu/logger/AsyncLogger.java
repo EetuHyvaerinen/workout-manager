@@ -14,17 +14,24 @@ public final class AsyncLogger {
         );
     }
 
-    public static AsyncLogger getLogger(Class<?> clazz) {
-        return LOGGERS.computeIfAbsent(clazz.getSimpleName(), AsyncLogger::new);
+    public static AsyncLogger getLogger(Class<?> targetClass) {
+        return LOGGERS.computeIfAbsent(targetClass.getSimpleName(), AsyncLogger::new);
     }
 
     public static List<String> getActiveLoggerNames() {
         return List.copyOf(LOGGERS.keySet());
     }
 
-    public static long getDroppedCount() { return LogDispatcher.getDroppedCount(); }
-    public static int  getQueueSize()    { return LogDispatcher.getQueueSize();    }
-    public static int  getQueueCapacity(){ return LogDispatcher.QUEUE_CAPACITY;    }
+    public static long getDroppedCount() {
+        return LogDispatcher.getDroppedCount();
+    }
+    public static int  getQueueSize() {
+        return LogDispatcher.getQueueSize();
+    }
+
+    public static int  getQueueCapacity() {
+        return LogDispatcher.QUEUE_CAPACITY;
+    }
 
     public enum Level { DEBUG, INFO, WARN, ERROR }
 
@@ -35,15 +42,31 @@ public final class AsyncLogger {
         this.name = name;
     }
 
-    public void  setLevel(Level level) { this.minimumLevel = level; }
-    public Level getLevel()            { return minimumLevel; }
+    public void  setLevel(Level level) {
+        this.minimumLevel = level;
+    }
+    public Level getLevel() {
+        return minimumLevel;
+    }
 
-    public void debug(String msg)              { log(Level.DEBUG, msg, null); }
-    public void info(String msg)               { log(Level.INFO,  msg, null); }
-    public void warn(String msg)               { log(Level.WARN,  msg, null); }
-    public void warn(String msg,  Throwable t) { log(Level.WARN,  msg, t);    }
-    public void error(String msg)              { log(Level.ERROR, msg, null); }
-    public void error(String msg, Throwable t) { log(Level.ERROR, msg, t);    }
+    public void debug(String msg) {
+        log(Level.DEBUG, msg, null);
+    }
+    public void info(String msg) {
+        log(Level.INFO,  msg, null);
+    }
+    public void warn(String msg) {
+        log(Level.WARN,  msg, null);
+    }
+    public void warn(String msg,  Throwable t) {
+        log(Level.WARN,  msg, t);
+    }
+    public void error(String msg) {
+        log(Level.ERROR, msg, null);
+    }
+    public void error(String msg, Throwable t) {
+        log(Level.ERROR, msg, t);
+    }
 
     private void log(Level level, String message, Throwable throwable) {
         if (level.ordinal() < minimumLevel.ordinal()) return;

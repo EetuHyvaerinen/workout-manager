@@ -1,5 +1,6 @@
 package dev.rezu;
 
+
 import com.sun.net.httpserver.HttpServer;
 import dev.rezu.dashboard.DashboardHandler;
 import dev.rezu.dashboard.DashboardService;
@@ -54,9 +55,6 @@ public class Server {
             httpServer.createContext("/api/dashboard", dashboardHandler);
             httpServer.createContext("/api/dashboard/stats", dashboardHandler);
             httpServer.createContext("/api/dashboard/logs", dashboardHandler);
-            httpServer.createContext("/api/dashboard/activity", dashboardHandler);
-            httpServer.createContext("/api/dashboard/trends", dashboardHandler);
-            httpServer.createContext("/api/dashboard/health", dashboardHandler);
 
             httpServer.start();
             logger.info("HTTP server started successfully on port " + SERVER_PORT);

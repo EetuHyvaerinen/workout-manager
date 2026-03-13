@@ -29,8 +29,6 @@ public class Authenticator {
     private static final int KEY_LENGTH = 256;
     private static final int SALT_LENGTH = 16;
 
-    public record AuthResult(int userId, boolean isAdmin) {}
-
     public Authenticator() {
         String secretKey = System.getenv("SecretKeyWorkoutHelper");
         byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
@@ -61,6 +59,7 @@ public class Authenticator {
 
             return new AuthResult(Integer.parseInt(payload.sub()), payload.admin());
         } catch (Exception e) {
+            logger.warn("JWT verification failed", e);
             return null;
         }
     }

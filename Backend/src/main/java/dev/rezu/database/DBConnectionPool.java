@@ -143,7 +143,9 @@ public class DBConnectionPool {
                 totalCreated.sum(),
                 totalTimeouts.sum(),
                 totalValidationsFailed.sum(),
-                totalRecycled.sum()
+                totalRecycled.sum(),
+                isHealthy(),
+                poolSize == 0 ? 0.0 : (activeConnections.get() * 100.0) / poolSize
         );
     }
 

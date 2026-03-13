@@ -1,5 +1,7 @@
 package dev.rezu.dashboard;
 
+import dev.rezu.database.DatabasePoolMetrics;
+
 import java.time.Instant;
 
 public record SystemStats(
@@ -8,7 +10,7 @@ public record SystemStats(
         long totalExercises,
         long activeUsers24h,
         long workoutsToday,
-        DatabaseStats databaseStats,
+        DatabasePoolMetrics databaseStats,
         ServerStats serverStats,
         Instant collectedAt
 ) {

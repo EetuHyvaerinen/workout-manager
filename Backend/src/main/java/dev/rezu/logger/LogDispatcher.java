@@ -16,8 +16,8 @@ final class LogDispatcher {
 
     static final int  QUEUE_CAPACITY     = 50_000;
     private static final int  BATCH_SIZE         = 512;
-    private static final long FLUSH_INTERVAL_MS  = 200;
-    private static final int  BUFFER_SIZE        = 8 * 1024;
+    private static final long FLUSH_INTERVAL_MS  = 500;
+    private static final int  BUFFER_SIZE        = 64 * 1024;
     private static final String LOG_DIR          = "logs";
     private static final long MAX_FILE_SIZE      = 10 * 1024 * 1024;
     private static final int  MAX_BACKUPS        = 10;

@@ -25,7 +25,7 @@ public class ExerciseDAO {
         }
     }
 
-    public void createExercises(PooledConnection conn, List<Exercise> exercises) {
+    public void createExercises(PooledConnection conn, List<Exercise> exercises) throws SQLException {
         String sql = "INSERT INTO exercises (workout_id, name, repetitions, weight) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -38,8 +38,6 @@ public class ExerciseDAO {
             }
 
             stmt.executeBatch();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
     }
 

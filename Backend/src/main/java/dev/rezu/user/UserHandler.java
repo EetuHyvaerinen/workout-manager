@@ -63,64 +63,68 @@ public class UserHandler extends BaseHandler {
     }
 
     private void handleRegistration(HttpExchange exchange) throws IOException {
+        JsonNode jsonNode;
         try (InputStreamReader reader = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8)) {
-            JsonNode jsonNode = JsonReader.parse(reader);
-            String email = jsonNode.str("email");
-            String password = jsonNode.str("password");
+            jsonNode = JsonReader.parse(reader);
+        }
+        String email = jsonNode.str("email");
+        String password = jsonNode.str("password");
 
-            if (email.isEmpty() || password.isEmpty()) {
-                logger.warn("Registration failed: Missing email or password in request body");
-                ResponseMessage.send(exchange, 400, ResponseMessageType.ERROR, "Email and password required");
-                return;
-            }
-            logger.info("Attempting to register user: " + email);
-            String salt = Authenticator.getNewSalt();
-            String hashed = getAuthenticator().hashPassword(password, salt);
-            int userId = userService.createUser(email, salt, hashed);
+        if (email.isEmpty() || password.isEmpty()) {
+            logger.warn("Registration failed: Missing email or password in request body");
+            ResponseMessage.send(exchange, 400, ResponseMessageType.ERROR, "Email and password required");
+            return;
+        }
+        logger.info("Attempting to register user: " + email);
+        String salt = Authenticator.getNewSalt();
+        String hashed = getAuthenticator().hashPassword(password, salt);
+        int userId = userService.createUser(email, salt, hashed);
 
-            if (userId == 0) {
-                logger.warn("Registration conflict: User already exists with email: " + email);
-                ResponseMessage.send(exchange, 409, ResponseMessageType.ERROR, "User already exists");
-            } else if (userId < 0) {
-                logger.error("Registration failed due to internal error for email: " + email);
-                ResponseMessage.send(exchange, 500, ResponseMessageType.ERROR, "Internal server error");
-            } else {
-                userService.logUserActivity(userId, "registered");
-                logger.info("User registered successfully. Assigned ID: " + userId);
-                ResponseMessage.send(exchange, 201, ResponseMessageType.MESSAGE, "Registration successful");
-            }
+        if (userId == 0) {
+            logger.warn("Registration conflict: User already exists with email: " + email);
+            ResponseMessage.send(exchange, 409, ResponseMessageType.ERROR, "User already exists");
+        } else if (userId < 0) {
+            logger.error("Registration failed due to internal error for email: " + email);
+            ResponseMessage.send(exchange, 500, ResponseMessageType.ERROR, "Internal server error");
+        } else {
+            userService.logUserActivity(userId, "registered");
+            logger.info("User registered successfully. Assigned ID: " + userId);
+            ResponseMessage.send(exchange, 201, ResponseMessageType.MESSAGE, "Registration successful");
         }
     }
 
     private void handleLogin(HttpExchange exchange) throws IOException {
+        JsonNode jsonNode;
         try (InputStreamReader reader = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8)) {
-            JsonNode root = JsonReader.parse(reader);
-            String email = root.str("email");
-            String password = root.str("password");
-            logger.info("Login attempt for email: " + email);
-            User user = userService.authenticateUser(email, password);
-
-            if (user == null) {
-                logger.warn("Failed login attempt for email: " + email);
-                ResponseMessage.send(exchange, 401, "Invalid credentials");
-                return;
-            }
-
-            String accessToken = getAuthenticator().createJwtToken(
-                    user.id(),
-                    user.isAdmin(),
-                    3600
-            );
-            String cookieValue = String.format(
-                    "accessToken=%s; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=3600",
-                    accessToken
-            );
-
-            exchange.getResponseHeaders().add("Set-Cookie", cookieValue);
-            userService.logUserActivity(user.id(), "login");
-            logger.info("User login successful. ID: " + user.id());
-            ResponseMessage.send(exchange, 200, ResponseMessageType.MESSAGE, "Login successful");
+            jsonNode = JsonReader.parse(reader);
         }
+        String email = jsonNode.str("email");
+        String password = jsonNode.str("password");
+
+        if (email.isEmpty() || password.isEmpty()) {
+            logger.warn("Login failed: Missing email or password in request body");
+            ResponseMessage.send(exchange, 400, ResponseMessageType.ERROR, "Email and password required");
+            return;
+        }
+
+        User user = userService.authenticateUser(email, password);
+
+        if (user == null) {
+            logger.warn("Failed login attempt");
+            ResponseMessage.send(exchange, 401, ResponseMessageType.ERROR, "Invalid credentials");
+            return;
+        }
+
+        String accessToken = getAuthenticator().createJwtToken(user.id(), user.isAdmin(), 3600);
+        String cookieValue = String.format(
+                "accessToken=%s; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=3600",
+                accessToken
+        );
+
+        exchange.getResponseHeaders().add("Set-Cookie", cookieValue);
+        userService.logUserActivity(user.id(), "login");
+        logger.info("User login successful. ID: " + user.id());
+        ResponseMessage.send(exchange, 200, ResponseMessageType.MESSAGE, "Login successful");
     }
 
     private void handleLogout(HttpExchange exchange) throws IOException {

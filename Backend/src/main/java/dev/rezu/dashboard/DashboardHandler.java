@@ -2,7 +2,6 @@ package dev.rezu.dashboard;
 
 import com.sun.net.httpserver.HttpExchange;
 import dev.rezu.*;
-import dev.rezu.json.JsonWriter;
 import dev.rezu.logger.AsyncLogger;
 import dev.rezu.response.ResponseMessage;
 import dev.rezu.response.ResponseMessageType;
@@ -41,12 +40,6 @@ public class DashboardHandler extends BaseHandler {
                 handleStats(exchange);
             } else if (path.endsWith("/dashboard/logs")) {
                 handleLogs(exchange, query);
-            } else if (path.endsWith("/dashboard/activity")) {
-                handleActivity(exchange, query);
-            } else if (path.endsWith("/dashboard/trends")) {
-                handleTrends(exchange, query);
-            } else if (path.endsWith("/dashboard/health")) {
-                handleHealthCheck(exchange);
             } else {
                 handleOverview(exchange);
             }
@@ -95,58 +88,5 @@ public class DashboardHandler extends BaseHandler {
 
         LogResponse logs = dashboardService.getLogs(requestedName, levelFilter, maxLines);
         ResponseMessage.send(exchange, 200, ResponseMessageType.DATA, logs);
-    }
-
-    private void handleActivity(HttpExchange exchange, String query) throws IOException {
-        int limit = 20;
-        
-        if (query != null && query.startsWith("limit=")) {
-            try {
-                limit = Integer.parseInt(query.substring(6));
-                limit = Math.min(limit, 100);
-            } catch (NumberFormatException e) {
-                logger.warn("Invalid limit parameter: " + query);
-            }
-        }
-        
-        RecentActivity activity = dashboardService.getRecentActivity(limit);
-        ResponseMessage.send(exchange, 200, ResponseMessageType.DATA, activity);
-    }
-
-    private void handleTrends(HttpExchange exchange, String query) throws IOException {
-        int days = 30;
-        
-        if (query != null && query.startsWith("days=")) {
-            try {
-                days = Integer.parseInt(query.substring(5));
-                days = Math.min(days, 365); // cap at 1 year
-            } catch (NumberFormatException e) {
-                logger.warn("Invalid days parameter: " + query);
-            }
-        }
-        
-        GrowthData trends = dashboardService.getGrowthTrends(days);
-        ResponseMessage.send(exchange, 200, ResponseMessageType.DATA, trends);
-    }
-
-    private void handleHealthCheck(HttpExchange exchange) throws IOException {
-        SystemStats stats = dashboardService.getSystemStats();
-        boolean healthy = stats.databaseStats().healthy();
-        long dropped = stats.serverStats().droppedCount();
-        
-        int statusCode = healthy ? 200 : 503;
-        
-        JsonWriter writer = new JsonWriter();
-        writer.beginObject()
-            .field("status", healthy ? "healthy" : "unhealthy")
-            .field("database", stats.databaseStats().healthy() ? "up" : "down")
-            .field("uptime", stats.serverStats().uptimeSeconds())
-            .field("memoryUsage", stats.serverStats().usedMemoryMB() + " MB")
-            .field("logQueueUsage", AsyncLogger.getQueueSize() + "/" + AsyncLogger.getQueueCapacity())
-            .field("logEventsDropped", dropped)
-            .field("loggerStatus", dropped == 0 ? "ok" : "dropping")
-        .endObject();
-        
-        ResponseMessage.send(exchange, statusCode, writer.toString());
     }
 }

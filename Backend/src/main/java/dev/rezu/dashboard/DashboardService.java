@@ -33,7 +33,7 @@ public class DashboardService {
         try (PooledConnection conn = connectionManager.getConnection()) {
             DashboardDAO.DbCounts counts = dashboardDAO.getAggregatedDbCounts(conn);
 
-            DatabaseStats dbStats = getDatabaseStats();
+            DatabasePoolMetrics dbStats = getDatabaseStats();
             ServerStats serverStats = getServerStats();
 
             return new SystemStats(
@@ -53,10 +53,9 @@ public class DashboardService {
         }
     }
 
-    private DatabaseStats getDatabaseStats() {
+    private DatabasePoolMetrics getDatabaseStats() {
         DatabasePoolMetrics metrics = connectionManager.getPoolMetrics();
-        boolean validatedHealthy = connectionManager.isPoolHealthy();
-        return DatabaseStats.fromMetrics(metrics, validatedHealthy);
+        return metrics;
     }
 
     private ServerStats getServerStats() {
@@ -78,48 +77,6 @@ public class DashboardService {
                 AsyncLogger.getQueueCapacity(),
                 AsyncLogger.getDroppedCount()
         );
-    }
-
-    public RecentActivity getRecentActivity(int limit) {
-        try (PooledConnection conn = connectionManager.getConnection()) {
-            List<RecentActivity.UserActivity> recentLogins =
-                dashboardDAO.getRecentLogins(conn, limit);
-            List<RecentActivity.WorkoutActivity> recentWorkouts =
-                dashboardDAO.getRecentWorkouts(conn, limit);
-            List<RecentActivity.ErrorActivity> recentErrors =
-                getRecentErrors(limit);
-            
-            return new RecentActivity(
-                recentLogins,
-                recentWorkouts,
-                recentErrors
-            );
-            
-        } catch (SQLException e) {
-            logger.error("Failed to get recent activity", e);
-            throw new RuntimeException("Failed to get recent activity", e);
-        }
-    }
-
-    private List<RecentActivity.ErrorActivity> getRecentErrors(int limit) {
-        List<RecentActivity.ErrorActivity> errors = new ArrayList<>();
-        try {
-            Path logDir = Paths.get(LOG_DIR);
-            if (!Files.exists(logDir)) return errors;
-
-            List<String> lastErrorLines = readTailWithFilter(
-                    Paths.get(LOG_DIR, "Server.log").toFile(),
-                    "ERROR",
-                    limit
-            );
-
-            for (String line : lastErrorLines) {
-                errors.add(new RecentActivity.ErrorActivity("ERROR", line, "Server.log", Instant.now()));
-            }
-        } catch (IOException e) {
-            logger.warn("Failed to scan error logs", e);
-        }
-        return errors;
     }
 
     public LogResponse getLogs(String loggerName, String levelFilter, int maxLines) {
@@ -203,21 +160,6 @@ public class DashboardService {
         } catch (IOException e) {
             logger.error("Failed to list log files", e);
             return List.of();
-        }
-    }
-
-    public GrowthData getGrowthTrends(int days) {
-        try (PooledConnection conn = connectionManager.getConnection()) {
-            List<TimeSeriesData> userGrowth =
-                dashboardDAO.getUserGrowth(conn, days);
-            List<TimeSeriesData> workoutTrends =
-                dashboardDAO.getWorkoutTrends(conn, days);
-            
-            return new GrowthData(userGrowth, workoutTrends);
-            
-        } catch (SQLException e) {
-            logger.error("Failed to get growth trends", e);
-            throw new RuntimeException("Failed to get growth trends", e);
         }
     }
 }
