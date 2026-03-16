@@ -58,7 +58,7 @@ public class PooledConnection implements AutoCloseable {
         }
     }
 
-    Connection getInternalConnection() {
+    public Connection getInternalConnection() {
         return physicalConnection;
     }
 }

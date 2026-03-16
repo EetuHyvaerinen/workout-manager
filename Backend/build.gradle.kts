@@ -1,6 +1,7 @@
 plugins {
     java
     application
+    id("com.gradleup.shadow") version "9.3.2"
 }
 
 group = "dev.rezu"
@@ -13,7 +14,8 @@ repositories {
 dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
-    
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     // Database driver
     implementation("com.mysql:mysql-connector-j:9.6.0")
 }
@@ -35,27 +37,18 @@ tasks.jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     
     manifest {
-        attributes(
-            "Main-Class" to "dev.rezu.Server",
-            "Implementation-Title" to "FitGet Workout Manager",
-            "Implementation-Version" to version
-        )
+        attributes["Main-Class"] = "dev.rezu.Server"
     }
-    
-    // Include all runtime dependencies in the JAR
-    from({
-        configurations.runtimeClasspath.get().filter { it.exists() }.map { 
-            if (it.isDirectory) it else zipTree(it) 
-        }
-    })
 }
 
-// Ensure static resources are included
-tasks.processResources {
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    from("src/main/resources") {
-        include("static/**")
-        include("*.p12") // Include keystore if in resources
+tasks.shadowJar {
+    archiveBaseName.set("workout-helper-server")
+    archiveVersion.set("")
+
+    manifest {
+        attributes(
+            "Main-Class" to "dev.rezu.Server"
+        )
     }
 }
 

@@ -58,6 +58,7 @@ public class Server {
 
             httpServer.start();
             logger.info("HTTP server started successfully on port " + SERVER_PORT);
+            System.out.println("HTTP server started successfully on port " + SERVER_PORT);
         } catch (Exception e) {
             logger.error("HTTP server startup failed", e);
         }

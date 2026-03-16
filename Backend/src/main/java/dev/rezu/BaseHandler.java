@@ -35,7 +35,15 @@ public abstract class BaseHandler implements HttpHandler {
             exchange.close();
             return;
         }
-        if (!rateLimiter.allowRequest(exchange.getRemoteAddress().getAddress().getHostAddress())) {
+
+        String clientIp = exchange.getRequestHeaders().getFirst("X-Forwarded-For");
+        if (clientIp == null || clientIp.isEmpty()) {
+            clientIp = exchange.getRemoteAddress().getAddress().getHostAddress();
+        } else {
+            clientIp = clientIp.split(",")[0].trim();
+        }
+
+        if (!rateLimiter.allowRequest(clientIp)) {
             exchange.getResponseHeaders().set("Retry-After", "60");
             ResponseMessage.send(exchange, 429, ResponseMessageType.ERROR, "Too many requests");
             return;
@@ -83,7 +91,7 @@ public abstract class BaseHandler implements HttpHandler {
                     exchange.getRequestURI().getPath() +
                     (exchange.getRequestURI().getQuery() != null ? "?" + exchange.getRequestURI().getQuery() : "") +
                     " | userId=" + userId +
-                    " | client=" + (exchange.getRemoteAddress() != null ? exchange.getRemoteAddress() : "unknown") +
+                    " | client=" + clientIp +
                     " | duration=" + duration + " ms");
             exchange.close();
         }
