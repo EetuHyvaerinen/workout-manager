@@ -7,3 +7,5 @@
 #os
 .DS_Store
 Thumbs.db
+/run-backend.bat
+/run_frontend_server.bat

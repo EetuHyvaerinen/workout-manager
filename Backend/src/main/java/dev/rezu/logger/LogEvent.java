@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter;
 public record LogEvent(
         Instant timestamp,
         String threadName,
-        AsyncLogger.Level level,
+        LogLevel level,
         String loggerName,
         String message,
         Throwable throwable
@@ -18,7 +18,7 @@ public record LogEvent(
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
                     .withZone(ZoneId.systemDefault());
 
-    static LogEvent create(AsyncLogger.Level level, String loggerName, String message, Throwable throwable) {
+    static LogEvent create(LogLevel level, String loggerName, String message, Throwable throwable) {
         return new LogEvent(
                 Instant.now(),
                 Thread.currentThread().getName(),
@@ -30,7 +30,7 @@ public record LogEvent(
     }
 
     static LogEvent poison() {
-        return new LogEvent(Instant.EPOCH, "", AsyncLogger.Level.DEBUG, "", "", null);
+        return new LogEvent(Instant.EPOCH, "", LogLevel.DEBUG, "", "", null);
     }
 
     public void appendTo(StringBuilder sb) {

@@ -3,6 +3,7 @@ package dev.rezu.dashboard;
 import com.sun.net.httpserver.HttpExchange;
 import dev.rezu.*;
 import dev.rezu.logger.AsyncLogger;
+import dev.rezu.logger.LogLevel;
 import dev.rezu.response.ResponseMessage;
 import dev.rezu.response.ResponseMessageType;
 
@@ -66,7 +67,7 @@ public class DashboardHandler extends BaseHandler {
 
     private void handleLogs(HttpExchange exchange, String query) throws IOException {
         String requestedName = "Server";
-        String levelFilter = "ALL";
+        LogLevel levelFilter = LogLevel.ALL;
         int maxLines = 100;
 
         if (query != null) {
@@ -76,10 +77,10 @@ public class DashboardHandler extends BaseHandler {
                     String value = URLDecoder.decode(kv[1], StandardCharsets.UTF_8);
                     switch (kv[0]) {
                         case "logger" -> requestedName = value;
-                        case "level"  -> levelFilter = value;
+                        case "level"  -> levelFilter = LogLevel.valueOf(value.toUpperCase());
                         case "lines"  -> {
                             try { maxLines = Math.min(Integer.parseInt(value), 1000); }
-                            catch (NumberFormatException ignored) {}
+                            catch (NumberFormatException _) {}
                         }
                     }
                 }

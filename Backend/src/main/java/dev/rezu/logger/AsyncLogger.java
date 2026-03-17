@@ -33,42 +33,40 @@ public final class AsyncLogger {
         return LogDispatcher.QUEUE_CAPACITY;
     }
 
-    public enum Level { DEBUG, INFO, WARN, ERROR }
-
     private final String name;
-    private volatile Level minimumLevel = Level.DEBUG;
+    private volatile LogLevel minimumLevel = LogLevel.DEBUG;
 
     private AsyncLogger(String name) {
         this.name = name;
     }
 
-    public void  setLevel(Level level) {
+    public void  setLevel(LogLevel level) {
         this.minimumLevel = level;
     }
-    public Level getLevel() {
+    public LogLevel getLevel() {
         return minimumLevel;
     }
 
     public void debug(String msg) {
-        log(Level.DEBUG, msg, null);
+        log(LogLevel.DEBUG, msg, null);
     }
     public void info(String msg) {
-        log(Level.INFO,  msg, null);
+        log(LogLevel.INFO,  msg, null);
     }
     public void warn(String msg) {
-        log(Level.WARN,  msg, null);
+        log(LogLevel.WARN,  msg, null);
     }
     public void warn(String msg,  Throwable t) {
-        log(Level.WARN,  msg, t);
+        log(LogLevel.WARN,  msg, t);
     }
     public void error(String msg) {
-        log(Level.ERROR, msg, null);
+        log(LogLevel.ERROR, msg, null);
     }
     public void error(String msg, Throwable t) {
-        log(Level.ERROR, msg, t);
+        log(LogLevel.ERROR, msg, t);
     }
 
-    private void log(Level level, String message, Throwable throwable) {
+    private void log(LogLevel level, String message, Throwable throwable) {
         if (level.ordinal() < minimumLevel.ordinal()) return;
         LogDispatcher.enqueue(LogEvent.create(level, name, message, throwable));
     }

@@ -4,6 +4,7 @@ import dev.rezu.database.DatabasePoolMetrics;
 import dev.rezu.logger.AsyncLogger;
 import dev.rezu.database.DatabaseConnectionManager;
 import dev.rezu.database.PooledConnection;
+import dev.rezu.logger.LogLevel;
 
 import java.io.*;
 import java.nio.channels.Channels;
@@ -79,7 +80,7 @@ public class DashboardService {
         );
     }
 
-    public LogResponse getLogs(String loggerName, String levelFilter, int maxLines) {
+    public LogResponse getLogs(String loggerName, LogLevel levelFilter, int maxLines) {
         List<String> activeLoggers = AsyncLogger.getActiveLoggerNames();
         Instant now = Instant.now();
 
@@ -102,16 +103,14 @@ public class DashboardService {
         }
     }
 
-    private List<String> readTailWithFilter(File file, String levelFilter, int maxLines) throws IOException {
+    private List<String> readTailWithFilter(File file, LogLevel levelFilter, int maxLines) throws IOException {
         if (file == null || !file.exists() || !file.isFile()) {
             return Collections.emptyList();
         }
 
         Deque<String> buffer = new ArrayDeque<>(maxLines);
 
-        String filterTag = (levelFilter == null || "ALL".equalsIgnoreCase(levelFilter))
-                ? null
-                : "[" + levelFilter.toUpperCase() + "]";
+        String filterTag = levelFilter == null ? null : "[" + levelFilter.name() + "]";
 
         long fileLength = file.length();
         long estimateBytes = Math.max(1024 * 10, (long) maxLines * 250 * 2);
@@ -119,16 +118,12 @@ public class DashboardService {
 
         try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
             raf.seek(seekPos);
-
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(Channels.newInputStream(raf.getChannel()), StandardCharsets.UTF_8))) {
-
                 String line;
-
                 if (seekPos > 0) {
                     reader.readLine();
                 }
-
                 while ((line = reader.readLine()) != null) {
                     if (filterTag == null || line.contains(filterTag)) {
                         buffer.addFirst(line);

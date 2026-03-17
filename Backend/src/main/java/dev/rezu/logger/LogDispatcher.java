@@ -58,7 +58,7 @@ final class LogDispatcher {
         }
         try {
             WRITER.join(10_000);
-        } catch (InterruptedException ignored) {
+        } catch (InterruptedException _) {
             Thread.currentThread().interrupt();
         }
     }
@@ -169,7 +169,7 @@ final class LogDispatcher {
         long existingSize = 0;
         try {
             if (Files.exists(logFile)) existingSize = Files.size(logFile);
-        } catch (IOException ignored) {}
+        } catch (IOException _) {}
         return new LoggerState(openChannelWithRetry(loggerName), existingSize);
     }
 
@@ -258,11 +258,11 @@ final class LogDispatcher {
 
     private static void closeQuietly(FileChannel channel) {
         if (channel != null) {
-            try { channel.close(); } catch (IOException ignored) {}
+            try { channel.close(); } catch (IOException _) {}
         }
     }
 
     private static void sleep(long ms) {
-        try { Thread.sleep(ms); } catch (InterruptedException ignored) {}
+        try { Thread.sleep(ms); } catch (InterruptedException _) {}
     }
 }

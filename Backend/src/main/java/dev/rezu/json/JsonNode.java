@@ -31,7 +31,7 @@ public record JsonNode(Map<String, Object> data) {
                 .filter(s -> !s.isBlank() && !"null".equals(s))
                 .flatMap(s -> {
                     try { return Optional.of(Instant.parse(s)); }
-                    catch (Exception ignored) { return Optional.empty(); }
+                    catch (Exception _) { return Optional.empty(); }
                 });
     }
 
