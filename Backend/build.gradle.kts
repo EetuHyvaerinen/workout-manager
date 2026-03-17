@@ -76,9 +76,9 @@ tasks.named("clean") {
 
 // to see deprecated alerts
 tasks.withType<JavaCompile> {
-    options.compilerArgs.addAll(listOf("-Xlint:deprecation", "-Xlint:unchecked"))
+    options.compilerArgs.addAll(listOf("-Xlint:deprecation", "-Xlint:unchecked", "--enable-preview"))
 }
 // to prevent alerts about native access
 tasks.withType<JavaExec> {
-    jvmArgs("--enable-native-access=ALL-UNNAMED", "-XX:+UseCompactObjectHeaders")
+    jvmArgs("--enable-native-access=ALL-UNNAMED", "-XX:+UseCompactObjectHeaders", "--enable-preview")
 }

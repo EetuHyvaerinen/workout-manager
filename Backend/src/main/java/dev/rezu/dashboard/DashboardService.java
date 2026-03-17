@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.StructuredTaskScope;
 import java.util.stream.Stream;
 
 public class DashboardService {
@@ -32,21 +33,31 @@ public class DashboardService {
 
     public SystemStats getSystemStats() {
         try (PooledConnection conn = connectionManager.getConnection()) {
-            DashboardDAO.DbCounts counts = dashboardDAO.getAggregatedDbCounts(conn);
+            try (var scope = StructuredTaskScope.open()) {
+                var databaseCountsFuture = scope.fork(() -> dashboardDAO.getAggregatedDbCounts(conn));
+                var databaseStatsFuture = scope.fork(() -> getDatabaseStats());
+                var serverStatsFuture = scope.fork(() -> getServerStats());
 
-            DatabasePoolMetrics dbStats = getDatabaseStats();
-            ServerStats serverStats = getServerStats();
+                scope.join();
 
-            return new SystemStats(
-                    counts.totalUsers(),
-                    counts.totalWorkouts(),
-                    counts.totalExercises(),
-                    counts.activeUsers24h(),
-                    counts.workoutsToday(),
-                    dbStats,
-                    serverStats,
-                    Instant.now()
-            );
+                DashboardDAO.DbCounts counts  = databaseCountsFuture.get();
+                DatabasePoolMetrics dbStats   = databaseStatsFuture.get();
+                ServerStats serverStats       = serverStatsFuture.get();
+
+                return new SystemStats(
+                        counts.totalUsers(),
+                        counts.totalWorkouts(),
+                        counts.totalExercises(),
+                        counts.activeUsers24h(),
+                        counts.workoutsToday(),
+                        dbStats,
+                        serverStats,
+                        Instant.now()
+                );
+            } catch (InterruptedException e) {
+                logger.error("Failed to collect system stats", e);
+                throw new RuntimeException("Database error during stats collection", e);
+            }
 
         } catch (SQLException e) {
             logger.error("Failed to collect system stats", e);
@@ -110,7 +121,7 @@ public class DashboardService {
 
         Deque<String> buffer = new ArrayDeque<>(maxLines);
 
-        String filterTag = levelFilter == null ? null : "[" + levelFilter.name() + "]";
+        String filterTag = levelFilter == LogLevel.ALL ? null : "[" + levelFilter.name() + "]";
 
         long fileLength = file.length();
         long estimateBytes = Math.max(1024 * 10, (long) maxLines * 250 * 2);

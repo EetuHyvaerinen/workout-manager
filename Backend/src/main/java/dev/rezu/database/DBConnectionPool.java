@@ -17,7 +17,7 @@ public class DBConnectionPool {
     private final String url, user, password;
     private final int poolSize;
     private final long timeout;
-    private final long maxLifetime = TimeUnit.MINUTES.toMillis(30);
+    private final long maxLifetime = TimeUnit.HOURS.toMillis(7);
     private final LinkedBlockingQueue<ConnectionWrapper> pool;
     private final ScheduledExecutorService healthChecker = Executors.newSingleThreadScheduledExecutor();
 
@@ -75,6 +75,7 @@ public class DBConnectionPool {
                     isBroken = true;
                 }
             } catch (SQLException e) {
+                logger.error("Exception with connection validation: ", e);
                 isBroken = true;
             }
 
