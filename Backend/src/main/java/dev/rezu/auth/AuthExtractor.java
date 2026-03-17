@@ -1,7 +1,6 @@
 package dev.rezu.auth;
 
 import com.sun.net.httpserver.HttpExchange;
-import dev.rezu.BaseHandler;
 import dev.rezu.logger.AsyncLogger;
 
 public class AuthExtractor {
@@ -14,10 +13,11 @@ public class AuthExtractor {
 
     public AuthResult authenticate(HttpExchange exchange) {
         String cookieHeader = exchange.getRequestHeaders().getFirst("Cookie");
-        if (cookieHeader == null || cookieHeader.isEmpty()) return null;
+        AuthResult anonymous = new AuthResult(-1, false);
+        if (cookieHeader == null || cookieHeader.isEmpty()) return anonymous;
 
         int tokenIndex = cookieHeader.indexOf("accessToken=");
-        if (tokenIndex == -1) return null;
+        if (tokenIndex == -1) return anonymous;
 
         int tokenStart = tokenIndex + "accessToken=".length();
         int tokenEnd = cookieHeader.indexOf(';', tokenStart);
@@ -25,7 +25,7 @@ public class AuthExtractor {
                 ? cookieHeader.substring(tokenStart).trim()
                 : cookieHeader.substring(tokenStart, tokenEnd).trim();
 
-        if (token.isEmpty()) return null;
+        if (token.isEmpty()) return anonymous;
 
         AuthResult result = authenticator.verifyJwtFull(token);
 
@@ -35,6 +35,6 @@ public class AuthExtractor {
         }
 
         logger.debug("Authentication failed: invalid or expired token");
-        return null;
+        return anonymous;
     }
 }

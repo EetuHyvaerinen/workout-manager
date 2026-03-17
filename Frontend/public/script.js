@@ -13,9 +13,10 @@ const modalCancelBtn = document.getElementById('modal-cancel');
 
 let exercises = [];
 let allWorkouts = [];
-let allPlans = []; 
+let allPlans = [];
 let selectedDate = new Date();
-let activePlanId = null; 
+let currentViewDate = new Date();
+let activePlanId = null;
 
 function init() {
   fetchWorkouts();
@@ -26,7 +27,7 @@ function init() {
 function logout() {
   fetch('http://localhost:8444/api/logout', {
     method: 'POST',
-    credentials: 'include' 
+    credentials: 'include'
   })
   .then(() => {
     window.location.href = '/workoutmanager/login.html';
@@ -52,8 +53,10 @@ function checkUserStatus() {
 }
 
 function fetchWorkouts() {
-  const dateParam = selectedDate.toISOString();
-  
+    const year = currentViewDate.getFullYear();
+    const month = currentViewDate.getMonth();
+    const dateParam = new Date(Date.UTC(year, month, 1)).toISOString();
+
   Promise.all([
     fetch(`http://localhost:8444/api/workout?date=${dateParam}`, { credentials: 'include' }),
     fetch(`http://localhost:8444/api/workout/plans`, { credentials: 'include' })
@@ -77,12 +80,19 @@ function fetchWorkouts() {
 
 function createCalendar() {
   const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth();
+    const year  = currentViewDate.getFullYear();
+    const month = currentViewDate.getMonth();
 
-  const firstDay = new Date(year, month, 1).getDay();
-  const startingDayIndex = (firstDay + 6) % 7;
-  const totalDaysInMonth = new Date(year, month + 1, 0).getDate();
+    const monthYearDisplay = document.getElementById('calendar-month-year');
+    if (monthYearDisplay) {
+        monthYearDisplay.textContent = currentViewDate.toLocaleDateString('en-US', {
+            month: 'long', year: 'numeric'
+        });
+    }
+
+    const startingDayIndex = (new Date(year, month, 1).getDay() + 6) % 7;
+    const totalDays        = new Date(year, month + 1, 0).getDate();
+
 
   const workoutDays = new Set(
     allWorkouts
@@ -112,35 +122,43 @@ function createCalendar() {
     slot.textContent = '';
     slot.removeAttribute('data-day');
 
-    const dayNumber = index - startingDayIndex + 1;
+        const day = index - startingDayIndex + 1;
 
-    if (dayNumber > 0 && dayNumber <= totalDaysInMonth) {
-      slot.textContent = dayNumber;
-      slot.setAttribute('data-day', dayNumber);
+        if (day <= 0 || day > totalDays) {
+            slot.classList.add('empty');
+            return;
+        }
 
-      if (dayNumber === today.getDate() && month === today.getMonth()) slot.classList.add('today');
-      if (dayNumber === selectedDate.getDate() && month === selectedDate.getMonth()) slot.classList.add('selected');
-      
-      if (workoutDays.has(dayNumber)) {
-        slot.classList.add('workout');
-      } else if (missedDays.has(dayNumber)) {
-        slot.classList.add('missed');
-      } else if (plannedDays.has(dayNumber)) {
-        slot.classList.add('planned');
-      }
-    } else {
-      slot.classList.add('empty');
-    }
-  });
+        slot.textContent = day;
+        slot.setAttribute('data-day', day);
+
+        if (day === today.getDate()        && month === today.getMonth())        slot.classList.add('today');
+        if (day === selectedDate.getDate() && month === selectedDate.getMonth()) slot.classList.add('selected');
+
+        if      (workoutDays.has(day)) slot.classList.add('workout');
+        else if (missedDays.has(day))  slot.classList.add('missed');
+        else if (plannedDays.has(day)) slot.classList.add('planned');
+    });
 }
 
 function setupEventListeners() {
+    document.getElementById('prev-month').addEventListener('click', () => {
+        currentViewDate = new Date(currentViewDate.getFullYear(), currentViewDate.getMonth() - 1, 1);
+        selectedDate = new Date(currentViewDate);
+        fetchWorkouts();
+    });
+
+    document.getElementById('next-month').addEventListener('click', () => {
+        currentViewDate = new Date(currentViewDate.getFullYear(), currentViewDate.getMonth() + 1, 1);
+        selectedDate = new Date(currentViewDate);
+        fetchWorkouts();
+    });
   weekdaysContainer.addEventListener('click', (e) => {
     const slot = e.target.closest('.calendar-day');
     if (!slot || slot.classList.contains('empty')) return;
 
     const day = parseInt(slot.getAttribute('data-day'));
-    selectedDate = new Date(new Date().getFullYear(), new Date().getMonth(), day);
+    selectedDate = new Date(currentViewDate.getFullYear(), currentViewDate.getMonth(), day);
 
     document.getElementById('create-workout-section').classList.add('active');
     createCalendar();
@@ -175,7 +193,7 @@ function displayWorkoutsForSelectedDay() {
 
 function renderWorkoutItem(data, isPlan) {
   const newDiv = document.createElement('div');
-  
+
   let itemClasses = 'workout-item';
   if (isPlan) {
     itemClasses += ' planned-item';
@@ -243,7 +261,7 @@ window.reschedulePlan = function(id, dateValue) {
   })
   .then(response => {
     if (response.ok) {
-      fetchWorkouts(); 
+      fetchWorkouts();
     } else {
       console.error("Failed to reschedule workout");
     }
@@ -276,12 +294,13 @@ window.startPlannedWorkout = function(planId) {
 
   workoutNameInput.value = plan.name;
   lockWorkoutName();
-  
+
+    document.getElementById('create-workout-section').classList.add('active');
   document.getElementById('create-workout-section').scrollIntoView({ behavior: 'smooth' });
 };
 
 function addExerciseUI(name) {
-  const id = Date.now() + Math.random(); 
+  const id = crypto.randomUUID();
   exercises.push({ id, name, sets: [] });
   const div = document.createElement('div');
   div.className = 'exercise-container';
@@ -292,12 +311,12 @@ function addExerciseUI(name) {
       <div class="set-input-group">
         <input type="number" placeholder="Reps" class="s-reps">
         <input type="number" placeholder="Kg" class="s-weight">
-        <button type="button" onclick="addSet(${id}, this)">+</button>
+        <button type="button" onclick="addSet('${id}', this)">+</button>
       </div>
     </div>
   `;
   exercisesContainer.appendChild(div);
-  
+
   const repsInput = div.querySelector('.s-reps');
   const weightInput = div.querySelector('.s-weight');
   const addButton = div.querySelector('button');
@@ -331,7 +350,7 @@ function renderSetsUI(exerciseId) {
   setList.innerHTML = ex.sets.map((set, index) => `
     <div class="set-container create-workout">
       <div>${set.repetitions} x ${set.weight}kg</div>
-      <button class="btn delete-x" onclick="deleteSet(${exerciseId}, ${index})">X</button>
+      <button class="btn delete-x" onclick="deleteSet('${exerciseId}', ${index})">X</button>
     </div>
   `).join('');
 }
@@ -345,18 +364,17 @@ window.deleteSet = function(exerciseId, setIndex) {
 };
 
 function lockWorkoutName() {
+  if (!workoutNameInput.parentNode) return;
   const name = workoutNameInput.value.trim() || "Untitled Workout";
   const nameDisplay = document.createElement('div');
   nameDisplay.className = 'locked-workout-name';
   nameDisplay.textContent = name;
   nameDisplay.onclick = () => unlockWorkoutName(nameDisplay);
-
-  if (workoutNameInput.parentNode) {
-    workoutNameInput.parentNode.replaceChild(nameDisplay, workoutNameInput);
-  }
+  workoutNameInput.parentNode.replaceChild(nameDisplay, workoutNameInput);
 }
 
 function unlockWorkoutName(displayElement) {
+  if (!displayElement.parentNode) return;
   displayElement.parentNode.replaceChild(workoutNameInput, displayElement);
   workoutNameInput.focus();
 }
@@ -367,11 +385,11 @@ workoutNameInput.addEventListener('keydown', (e) => {
 });
 
 createWorkoutBtn.addEventListener('click', () => {
-    if (exercises.length === 0) return alert('Add an exercise first');
-    
+    if (!exercises.length) return alert('Add an exercise first');
+
     const lockedName = document.querySelector('.locked-workout-name');
     const workoutName = lockedName ? lockedName.textContent : workoutNameInput.value.trim();
-    
+
     const exercisesPayload = exercises.flatMap(ex => ex.sets.map(s => ({
         name: ex.name,
         repetitions: parseInt(s.repetitions),
@@ -380,11 +398,11 @@ createWorkoutBtn.addEventListener('click', () => {
 
     const payload = {
         name: workoutName || "Untitled Workout",
-        createdAt: selectedDate.toISOString(), 
+        createdAt: selectedDate.toISOString(),
         exercises: exercisesPayload
     };
 
-    const endpoint = activePlanId 
+    const endpoint = activePlanId
         ? `http://localhost:8444/api/workout/plans/complete?planId=${activePlanId}`
         : 'http://localhost:8444/api/workout';
 
@@ -399,7 +417,7 @@ createWorkoutBtn.addEventListener('click', () => {
             activePlanId = null;
             exercisesContainer.innerHTML = '';
             if (lockedName) lockedName.parentNode.replaceChild(workoutNameInput, lockedName);
-            workoutNameInput.value = ''; 
+            workoutNameInput.value = '';
             fetchWorkouts();
         } else {
             alert("Failed to save workout.");
@@ -407,49 +425,37 @@ createWorkoutBtn.addEventListener('click', () => {
     });
 });
 
+function openConfirmModal(onConfirm) {
+    customModal.classList.add('active');
+
+    const handleConfirm = () => {
+        onConfirm().then(() => { closeModal(); fetchWorkouts(); });
+    };
+    const closeModal = () => {
+        customModal.classList.remove('active');
+        modalConfirmBtn.removeEventListener('click', handleConfirm);
+    };
+
+    modalConfirmBtn.addEventListener('click', handleConfirm, { once: true });
+    modalCancelBtn.addEventListener('click', closeModal, { once: true });
+}
+
 window.deleteWorkout = function (id) {
-  customModal.classList.add('active');
-  const handleConfirm = () => {
-    fetch(`http://localhost:8444/api/workout?workoutId=${id}`, {
-      method: 'DELETE',
-      credentials: 'include',
-    }).then(() => {
-      closeModal();
-      fetchWorkouts();
-    });
-  };
-
-  const closeModal = () => {
-    customModal.classList.remove('active');
-    modalConfirmBtn.removeEventListener('click', handleConfirm);
-  };
-
-  modalConfirmBtn.addEventListener('click', handleConfirm, { once: true });
-  modalCancelBtn.addEventListener('click', closeModal, { once: true });
+    openConfirmModal(() =>
+        fetch(`http://localhost:8444/api/workout?workoutId=${id}`, { method: 'DELETE', credentials: 'include' })
+    );
 };
 
+
 window.deletePlan = function (id) {
-  customModal.classList.add('active');
-  document.getElementById('modal-message').textContent = "Do you really want to delete this planned workout?";
-  
-  const handleConfirm = () => {
-    fetch(`http://localhost:8444/api/workout/plans?planId=${id}`, {
-      method: 'DELETE',
-      credentials: 'include',
-    }).then(() => {
-      closeModal();
-      fetchWorkouts();
-    });
-  };
-
-  const closeModal = () => {
-    customModal.classList.remove('active');
-    document.getElementById('modal-message').textContent = "Do you really want to delete this workout?";
-    modalConfirmBtn.removeEventListener('click', handleConfirm);
-  };
-
-  modalConfirmBtn.addEventListener('click', handleConfirm, { once: true });
-  modalCancelBtn.addEventListener('click', closeModal, { once: true });
+    document.getElementById('modal-message').textContent = 'Do you really want to delete this planned workout?';
+    openConfirmModal(() =>
+        fetch(`http://localhost:8444/api/workout/plans?planId=${id}`, { method: 'DELETE', credentials: 'include' })
+            .then(res => {
+                document.getElementById('modal-message').textContent = 'Do you really want to delete this workout?';
+                return res;
+            })
+    );
 };
 
 init();

@@ -31,7 +31,7 @@ public class WorkoutDAO {
             pstmt.setString(1, uuid);
             pstmt.setInt(2, userId);
             pstmt.setString(3, name);
-            pstmt.setTimestamp(4, Timestamp.from(time)); // Respect the user's selected date
+            pstmt.setTimestamp(4, Timestamp.from(time));
             pstmt.executeUpdate();
             return uuid;
         }

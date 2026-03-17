@@ -108,7 +108,7 @@ public class JsonWriter {
                 case '\r' -> escaped.append("\\r");
                 case '\t' -> escaped.append("\\t");
                 default -> {
-                    if (c < ' ') escaped.append(String.format("\\u%04x", (int) c));
+                    if (c < ' ') escaped.append(HexFormat.of().toHexDigits(c));
                     else escaped.append(c);
                 }
             }

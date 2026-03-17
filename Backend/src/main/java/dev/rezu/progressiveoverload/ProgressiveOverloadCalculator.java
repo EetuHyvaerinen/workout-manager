@@ -6,10 +6,8 @@ import dev.rezu.workout.Workout;
 import dev.rezu.workout.WorkoutStatus;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class ProgressiveOverloadCalculator {
 
@@ -48,6 +46,6 @@ public class ProgressiveOverloadCalculator {
     public List<PlannedWorkout> applyProgressiveOverload(List<Workout> workouts) {
         return workouts.stream()
                 .map(this::getProgressiveOverloadForWorkout)
-                .collect(Collectors.toCollection(() -> new ArrayList<>(workouts.size())));
+                .toList();
     }
 }

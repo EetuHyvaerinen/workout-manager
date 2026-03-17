@@ -47,9 +47,7 @@ public abstract class BaseHandler implements HttpHandler {
             ResponseMessage.send(exchange, 429, ResponseMessageType.ERROR, "Too many requests");
             return;
         }
-        AuthResult authResult = authExtractor.authenticate(exchange);
-        int userId = authResult != null ? authResult.userId() : -1;
-        boolean isAdmin = authResult != null && authResult.isAdmin();
+        AuthResult auth = authExtractor.authenticate(exchange);
 
         String path = exchange.getRequestURI().getPath();
             //check if authentication is required
@@ -57,12 +55,12 @@ public abstract class BaseHandler implements HttpHandler {
                     || path.equals("/api/login")
                     || path.equals("/api/logout");
 
-            if (userId == -1 && !isPublicEndpoint) {
+            if (!auth.isAuthenticated() && !isPublicEndpoint) {
                 ResponseMessage.send(exchange, 401, ResponseMessageType.ERROR, "Unauthorized");
                 return;
             }
         try {
-            ScopedValue.where(AUTH_CONTEXT, authResult).call(() -> {
+            ScopedValue.where(AUTH_CONTEXT, auth).call(() -> {
                 String method = exchange.getRequestMethod().toUpperCase();
                 switch (method) {
                     case "GET" -> handleGet(exchange);
@@ -88,7 +86,7 @@ public abstract class BaseHandler implements HttpHandler {
             logger.info(exchange.getRequestMethod().toUpperCase() + " " +
                     exchange.getRequestURI().getPath() +
                     (exchange.getRequestURI().getQuery() != null ? "?" + exchange.getRequestURI().getQuery() : "") +
-                    " | userId=" + userId +
+                    " | userId=" + auth.userId() +
                     " | client=" + clientIp +
                     " | duration=" + duration + " ms");
             exchange.close();

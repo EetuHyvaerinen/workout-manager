@@ -8,7 +8,6 @@ import dev.rezu.workout.WorkoutStatus;
 import java.sql.*;
 import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class PlannedWorkoutDAO {
 
@@ -96,7 +95,7 @@ public class PlannedWorkoutDAO {
 
     public Map<String, List<Exercise>> getExercisesByPlanIds(PooledConnection conn, List<String> planIds) throws SQLException {
         if (planIds.isEmpty()) return Map.of();
-        String inClause = planIds.stream().map(id -> "?").collect(Collectors.joining(", "));
+        String inClause = String.join(", ", Collections.nCopies(planIds.size(), "?"));
         String sql = "SELECT * FROM planned_exercises WHERE planned_workout_id IN (" + inClause + ")";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -105,7 +104,7 @@ public class PlannedWorkoutDAO {
                 Map<String, List<Exercise>> map = new HashMap<>();
                 while (rs.next()) {
                     String pId = rs.getString("planned_workout_id");
-                    map.computeIfAbsent(pId, k -> new ArrayList<>()).add(new Exercise(
+                    map.computeIfAbsent(pId, _ -> new ArrayList<>()).add(new Exercise(
                             0, pId, rs.getString("name"), rs.getInt("target_repetitions"), rs.getDouble("target_weight")
                     ));
                 }

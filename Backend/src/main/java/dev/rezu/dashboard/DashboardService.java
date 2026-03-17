@@ -66,8 +66,7 @@ public class DashboardService {
     }
 
     private DatabasePoolMetrics getDatabaseStats() {
-        DatabasePoolMetrics metrics = connectionManager.getPoolMetrics();
-        return metrics;
+        return connectionManager.getPoolMetrics();
     }
 
     private ServerStats getServerStats() {

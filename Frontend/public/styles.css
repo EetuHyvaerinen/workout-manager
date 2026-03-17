@@ -758,3 +758,26 @@ display: flex;
   background: var(--primary);
   text-decoration: none; /* Override global 'a:hover' underline */
 }
+
+.calendar-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.calendar-nav h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 1.2rem;
+}
+
+.calendar-nav .btn {
+  padding: 5px 15px;
+  background: var(--element-bg);
+  border: 1px solid var(--primary);
+}
+
+.calendar-nav .btn:hover {
+  background: var(--primary);
+}
