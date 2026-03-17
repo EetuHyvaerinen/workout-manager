@@ -29,6 +29,8 @@ public class Authenticator {
     private static final int KEY_LENGTH = 256;
     private static final int SALT_LENGTH = 16;
 
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
     public Authenticator() {
         String secretKey = System.getenv("SecretKeyWorkoutHelper");
         byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
@@ -125,9 +127,8 @@ public class Authenticator {
     }
 
     public static String getNewSalt() {
-        SecureRandom random = new SecureRandom();
         byte[] salt = new byte[SALT_LENGTH];
-        random.nextBytes(salt);
+        SECURE_RANDOM.nextBytes(salt);
         return Base64.getEncoder().encodeToString(salt);
     }
 }
