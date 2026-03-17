@@ -31,19 +31,19 @@ public class WorkoutDAO {
             pstmt.setString(1, uuid);
             pstmt.setInt(2, userId);
             pstmt.setString(3, name);
-            pstmt.setTimestamp(4, Timestamp.from(time));
+            pstmt.setObject(4, time);
             pstmt.executeUpdate();
             return uuid;
         }
     }
 
 
-    public List<Workout> getWorkouts(PooledConnection conn, Timestamp start, Timestamp end, int userId) throws SQLException {
+    public List<Workout> getWorkouts(PooledConnection conn, Instant start, Instant end, int userId) throws SQLException {
         String sql = "SELECT * FROM workouts WHERE created_at >= ? AND created_at < ? AND user_id = ?";
         List<Workout> workouts = new ArrayList<>();
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setTimestamp(1, start);
-            pstmt.setTimestamp(2, end);
+            pstmt.setObject(1, start);
+            pstmt.setObject(2, end);
             pstmt.setInt(3, userId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {

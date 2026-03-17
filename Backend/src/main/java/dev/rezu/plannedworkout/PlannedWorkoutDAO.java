@@ -19,7 +19,7 @@ public class PlannedWorkoutDAO {
             pstmt.setString(1, plan.id());
             pstmt.setInt(2, plan.userId());
             pstmt.setString(3, plan.name());
-            pstmt.setTimestamp(4, Timestamp.from(plan.activateTime()));
+            pstmt.setObject(4, plan.activateTime());
             pstmt.setString(5, plan.status().name());
             pstmt.executeUpdate();
 
@@ -70,7 +70,7 @@ public class PlannedWorkoutDAO {
         String sql = "UPDATE planned_workouts SET status = 'MISSED' WHERE user_id = ? AND status = 'PLANNED' AND activate_time < ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, userId);
-            pstmt.setTimestamp(2, Timestamp.from(cutoff));
+            pstmt.setObject(2, cutoff);
             pstmt.executeUpdate();
         }
     }
@@ -78,7 +78,7 @@ public class PlannedWorkoutDAO {
     public void reschedule(PooledConnection conn, String planId, Instant newTime) throws SQLException {
         String sql = "UPDATE planned_workouts SET activate_time = ?, status = 'PLANNED' WHERE id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setTimestamp(1, Timestamp.from(newTime));
+            pstmt.setObject(1, newTime);
             pstmt.setString(2, planId);
             pstmt.executeUpdate();
         }

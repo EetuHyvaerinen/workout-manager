@@ -8,8 +8,8 @@ import dev.rezu.plannedworkout.PlannedWorkoutDAO;
 import dev.rezu.progressiveoverload.ProgressiveOverloadCalculator;
 
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.time.*;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -68,10 +68,11 @@ public class WorkoutService {
     }
 
     public List<Workout> getWorkoutsForMonth(Instant instant, int userId) {
-        ZonedDateTime datetime = instant.atZone(ZoneOffset.UTC);
-        YearMonth month = YearMonth.from(datetime);
-        Timestamp start = Timestamp.from(month.atDay(1).atStartOfDay(ZoneOffset.UTC).toInstant());
-        Timestamp end = Timestamp.from(month.plusMonths(1).atDay(1).atStartOfDay(ZoneOffset.UTC).toInstant());
+        ZonedDateTime startOfMonth = instant.atZone(ZoneOffset.UTC)
+                .withDayOfMonth(1)
+                .truncatedTo(ChronoUnit.DAYS);
+        Instant start = startOfMonth.toInstant();
+        Instant end = startOfMonth.plusMonths(1).toInstant();
 
         try (PooledConnection conn = connectionManager.getConnection()) {
             List<Workout> workouts = workoutDAO.getWorkouts(conn, start, end, userId);
@@ -79,7 +80,8 @@ public class WorkoutService {
             for (Workout workout : workouts) {
                 workoutIds.add(workout.id());
             }
-            Map<String, List<Exercise>> exercisesByWorkoutId = exerciseDAO.getExercisesByWorkoutIds(conn, workoutIds);
+            Map<String, List<Exercise>> exercisesByWorkoutId =
+                    exerciseDAO.getExercisesByWorkoutIds(conn, workoutIds);
             List<Workout> returnData = new ArrayList<>(workouts.size());
             for (Workout workout : workouts) {
                 List<Exercise> exercises = exercisesByWorkoutId.getOrDefault(workout.id(), List.of());
@@ -88,7 +90,7 @@ public class WorkoutService {
             return returnData;
 
         } catch (SQLException e) {
-            logger.error("Failed to fetch workouts for month: " + month + " for user " + userId, e);
+            logger.error("Failed to fetch workouts for month: " + startOfMonth.getMonth() + " for user " + userId, e);
             throw new RuntimeException("Failed to fetch workouts for month", e);
         }
     }
