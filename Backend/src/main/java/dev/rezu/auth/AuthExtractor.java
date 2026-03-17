@@ -1,6 +1,7 @@
 package dev.rezu.auth;
 
 import com.sun.net.httpserver.HttpExchange;
+import dev.rezu.BaseHandler;
 import dev.rezu.logger.AsyncLogger;
 
 public class AuthExtractor {

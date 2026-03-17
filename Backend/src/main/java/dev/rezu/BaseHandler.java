@@ -18,8 +18,7 @@ public abstract class BaseHandler implements HttpHandler {
     private static final RateLimiter rateLimiter = new RateLimiter();
     private static final AuthExtractor authExtractor = new AuthExtractor(authenticator);
 
-    public record AuthContext(int userId, boolean isAdmin) {}
-    public static final ScopedValue<AuthContext> AUTH_CONTEXT = ScopedValue.newInstance();
+    public static final ScopedValue<AuthResult> AUTH_CONTEXT = ScopedValue.newInstance();
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -51,7 +50,6 @@ public abstract class BaseHandler implements HttpHandler {
         AuthResult authResult = authExtractor.authenticate(exchange);
         int userId = authResult != null ? authResult.userId() : -1;
         boolean isAdmin = authResult != null && authResult.isAdmin();
-        AuthContext authContext = new AuthContext(userId, isAdmin);
 
         String path = exchange.getRequestURI().getPath();
             //check if authentication is required
@@ -64,7 +62,7 @@ public abstract class BaseHandler implements HttpHandler {
                 return;
             }
         try {
-            ScopedValue.where(AUTH_CONTEXT, authContext).call(() -> {
+            ScopedValue.where(AUTH_CONTEXT, authResult).call(() -> {
                 String method = exchange.getRequestMethod().toUpperCase();
                 switch (method) {
                     case "GET" -> handleGet(exchange);
@@ -101,7 +99,7 @@ public abstract class BaseHandler implements HttpHandler {
         return authenticator;
     }
 
-    protected static AuthContext auth() {
+    protected static AuthResult auth() {
         return AUTH_CONTEXT.get();
     }
 
