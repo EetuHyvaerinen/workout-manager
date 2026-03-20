@@ -7,26 +7,28 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 final class LogDispatcher {
 
-    static final int  QUEUE_CAPACITY     = 50_000;
-    private static final int  BATCH_SIZE         = 512;
-    private static final long FLUSH_INTERVAL_MS  = 500;
-    private static final int  BUFFER_SIZE        = 64 * 1024;
-    private static final String LOG_DIR          = "logs";
-    private static final long MAX_FILE_SIZE      = 10 * 1024 * 1024;
-    private static final int  MAX_BACKUPS        = 10;
+    static final int  QUEUE_CAPACITY = 50_000;
+    private static final int  BATCH_SIZE = 512;
+    private static final long FLUSH_INTERVAL_MS = 500;
+    private static final int  BUFFER_SIZE = 64 * 1024;
+    private static final String LOG_DIR = "logs";
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
+    private static final int  MAX_BACKUPS = 10;
 
     private static final LogEvent POISON = LogEvent.poison();
 
-    private static final BlockingQueue<LogEvent> QUEUE   = new ArrayBlockingQueue<>(QUEUE_CAPACITY);
-    private static final AtomicLong              DROPPED = new AtomicLong(0);
-    private static final Thread                  WRITER;
+    private static final BlockingQueue<LogEvent> QUEUE = new ArrayBlockingQueue<>(QUEUE_CAPACITY);
+    private static final AtomicLong DROPPED = new AtomicLong(0);
+
+    private static final ExecutorService WRITER_EXECUTOR =
+            Executors.newSingleThreadExecutor(Thread.ofPlatform()
+                    .name("async-logger-writer")
+                    .factory());
 
     static {
         try {
@@ -35,10 +37,11 @@ final class LogDispatcher {
             System.err.println("Failed to create log directory: " + e.getMessage());
         }
 
-        WRITER = Thread.ofPlatform()
-                .name("async-logger-writer")
-                .daemon(true)
-                .start(LogDispatcher::writerLoop);
+        WRITER_EXECUTOR.submit(LogDispatcher::writerLoop);
+
+        Runtime.getRuntime().addShutdownHook(
+                new Thread(LogDispatcher::shutdown, "async-logger-shutdown")
+        );
     }
 
     private LogDispatcher() {}
@@ -56,9 +59,13 @@ final class LogDispatcher {
         while (!QUEUE.offer(POISON)) {
             Thread.yield();
         }
+
+        WRITER_EXECUTOR.shutdown();
         try {
-            WRITER.join(10_000);
-        } catch (InterruptedException _) {
+            if (!WRITER_EXECUTOR.awaitTermination(10, TimeUnit.SECONDS)) {
+                WRITER_EXECUTOR.shutdownNow();
+            }
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
     }
