@@ -19,7 +19,7 @@ A live demo is available [here](https://www.hyvaerinen.com/workoutmanager/login?
 
 ## System Architecture
 
-The backend is built on a custom HTTP server using Java virtual threads for high-throughput, low-latency request handling. Utilizes features from new JDK versions like virtual threads, ScopedValue and switch pattern matching
+The backend is built on a custom HTTP server using Java virtual threads for high-throughput, low-latency request handling. Utilizes features from new JDK versions like virtual threads, ScopedValue, switch pattern matching and structured concurrency
 
 Custom Infrastructure engineered for minimal overhead and zero external dependencies
 
