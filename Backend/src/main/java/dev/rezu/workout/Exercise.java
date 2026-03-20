@@ -8,15 +8,16 @@ public record Exercise(
         String name,
         int repetitions,
         double weight,
+        double rpe,
         Instant createdAt,
         Instant updatedAt
 ) {
-    public Exercise(int id, String workoutId, String name, int repetitions, double weight) {
-        this(id, workoutId, name, repetitions, weight, null, null);
+    public Exercise(int id, String workoutId, String name, int repetitions, double weight, double rpe) {
+        this(id, workoutId, name, repetitions, weight, rpe, null, null);
     }
 
     public Exercise withWorkoutId(String workoutId) {
-        return new Exercise(this.id, workoutId, this.name(), this.repetitions(), this.weight(), this.createdAt(), this.updatedAt());
+        return new Exercise(this.id, workoutId, this.name, this.repetitions, this.weight, this.rpe, this.createdAt, this.updatedAt);
     }
 
     public Exercise withRepsAndWeight(int newReps, double newWeight) {
@@ -26,6 +27,7 @@ public record Exercise(
                 this.name,
                 newReps,
                 newWeight,
+                this.rpe,
                 this.createdAt,
                 this.updatedAt
         );

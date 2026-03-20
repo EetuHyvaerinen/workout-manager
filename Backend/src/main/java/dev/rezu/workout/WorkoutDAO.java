@@ -37,7 +37,6 @@ public class WorkoutDAO {
         }
     }
 
-
     public List<Workout> getWorkouts(PooledConnection conn, Instant start, Instant end, int userId) throws SQLException {
         String sql = "SELECT * FROM workouts WHERE created_at >= ? AND created_at < ? AND user_id = ?";
         List<Workout> workouts = new ArrayList<>();

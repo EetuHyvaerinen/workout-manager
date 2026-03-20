@@ -237,11 +237,11 @@ public class WorkoutService {
                 List<Exercise> exercisesWithId = actuals.stream()
                         .map(ex -> ex.withWorkoutId(workoutId)).toList();
                 exerciseDAO.createExercises(conn, exercisesWithId);
-
+                PlannedWorkout originalPlan = plannedWorkoutDAO.getPlanById(conn, planId, userId);
                 plannedWorkoutDAO.markCompleted(conn, planId, workoutId);
 
                 Workout finished = new Workout(workoutId, userId, name, Instant.now(), null, exercisesWithId);
-                PlannedWorkout next = progressiveOverloadCalculator.getProgressiveOverloadForWorkout(finished);
+                PlannedWorkout next = progressiveOverloadCalculator.getProgressiveOverloadForWorkout(finished, originalPlan);
                 plannedWorkoutDAO.createPlan(conn, next);
 
                 conn.commit();

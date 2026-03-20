@@ -105,12 +105,51 @@ public class PlannedWorkoutDAO {
                 while (rs.next()) {
                     String pId = rs.getString("planned_workout_id");
                     map.computeIfAbsent(pId, _ -> new ArrayList<>()).add(new Exercise(
-                            0, pId, rs.getString("name"), rs.getInt("target_repetitions"), rs.getDouble("target_weight")
+                            0, pId, rs.getString("name"), rs.getInt("target_repetitions"), rs.getDouble("target_weight"),
+                            rs.getDouble("target_rpe")
                     ));
                 }
                 return map;
             }
         }
+    }
+
+    public PlannedWorkout getPlanById(PooledConnection conn, String planId, int userId) throws SQLException {
+        String sql = "SELECT * FROM planned_workouts WHERE id = ? AND user_id = ?";
+        PlannedWorkout plan = null;
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, planId);
+            pstmt.setInt(2, userId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    plan = new PlannedWorkout(
+                            rs.getString("id"),
+                            userId,
+                            rs.getString("name"),
+                            rs.getTimestamp("activate_time").toInstant(),
+                            WorkoutStatus.valueOf(rs.getString("status")),
+                            rs.getString("completed_workout_id"),
+                            new ArrayList<>()
+                    );
+                }
+            }
+        }
+
+        if (plan == null) return null;
+        Map<String, List<Exercise>> map = getExercisesByPlanIds(conn, List.of(planId));
+        List<Exercise> exercises = map.getOrDefault(planId, List.of());
+
+        return new PlannedWorkout(
+                plan.id(),
+                plan.userId(),
+                plan.name(),
+                plan.activateTime(),
+                plan.status(),
+                plan.completedWorkoutId(),
+                exercises
+        );
     }
 
     public boolean deletePlan(PooledConnection conn, String id, int userId) throws SQLException {

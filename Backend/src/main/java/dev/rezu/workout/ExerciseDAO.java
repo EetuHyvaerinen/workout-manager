@@ -107,6 +107,7 @@ public class ExerciseDAO {
                 rs.getString("name"),
                 rs.getInt("repetitions"),
                 rs.getDouble("weight"),
+                rs.getDouble("rpe"),
                 rs.getTimestamp("created_at").toInstant(),
                 rs.getTimestamp("updated_at").toInstant()
         );

@@ -30,7 +30,7 @@ public class AuthExtractor {
         AuthResult result = authenticator.verifyJwtFull(token);
 
         if (result != null && result.userId() > 0) {
-            logger.debug("User authenticated successfully: userId: " + result.userId());
+            logger.info("User authenticated successfully: userId: " + result.userId());
             return result;
         }
 

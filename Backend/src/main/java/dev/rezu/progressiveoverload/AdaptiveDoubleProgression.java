@@ -1,52 +1,76 @@
 package dev.rezu.progressiveoverload;
 
+
 import dev.rezu.workout.Exercise;
 
 public class AdaptiveDoubleProgression implements ProgressionStrategy {
 
-    private final int minReps;
-    private final int maxReps;
-    private final double incrementPercentage;
-    private final double minimumWeightIncrement;
+    private static final double OVERSHOOT_RPE  = 9.5;
+    private static final double UNDERSHOOT_RPE = 6.0;
+
+    private final ProgressionConfig config;
 
     public AdaptiveDoubleProgression() {
-        this(8, 12, 0.025, 1.25);
+        this(ProgressionConfig.strength());
     }
 
-    public AdaptiveDoubleProgression(int minReps, int maxReps, double incrementPercentage, double minimumWeightIncrement) {
-        this.minReps = minReps;
-        this.maxReps = maxReps;
-        this.incrementPercentage = incrementPercentage;
-        this.minimumWeightIncrement = minimumWeightIncrement;
+    public AdaptiveDoubleProgression(ProgressionConfig config) {
+        this.config = config;
     }
 
     @Override
-    public Exercise calculateNext(Exercise previousPerformance) {
-        return null;
+    public Exercise calculateNext(Exercise actual) {
+        if (actual.rpe() > 0.0) {
+            if (actual.rpe() >= OVERSHOOT_RPE) {
+                return actual.withRepsAndWeight(actual.repetitions(), actual.weight());
+            }
+            if (actual.rpe() <= UNDERSHOOT_RPE) {
+                return doubleJump(actual);
+            }
+        }
+        return actual;
     }
 
     @Override
     public Exercise calculateNext(Exercise actual, Exercise planned) {
-        int actualReps = actual.repetitions();
-        double actualWeight = actual.weight();
+        int    actualReps  = actual.repetitions();
+        int    plannedReps = planned.repetitions();
+        double weight      = actual.weight();
 
-        if (actualReps < planned.repetitions()) {
-            double completionRate = (double) actualReps / planned.repetitions();
+        if (actualReps < plannedReps) {
+            double completionRate = (double) actualReps / plannedReps;
 
-            if (completionRate < 0.80) {
-                double deloadWeight = Math.round((actualWeight * 0.90) * 4) / 4.0;
-                return actual.withRepsAndWeight(minReps, deloadWeight);
+            if (completionRate < config.deloadThresholdPct()) {
+                double deloadWeight = config.roundToIncrement(weight * config.deloadFactor());
+                return actual.withRepsAndWeight(config.minReps(), deloadWeight);
             }
 
-            return actual.withRepsAndWeight(minReps, actualWeight);
+            return actual.withRepsAndWeight(plannedReps, weight);
         }
 
-        if (actualReps >= maxReps) {
-            double increase = Math.max(actualWeight * incrementPercentage, minimumWeightIncrement);
-            double newWeight = Math.round((actualWeight + increase) * 4) / 4.0;
-            return actual.withRepsAndWeight(minReps, newWeight);
+        if (actual.rpe() > 0.0 && actual.rpe() >= OVERSHOOT_RPE) {
+            return actual.withRepsAndWeight(plannedReps, weight);
         }
 
-        return actual.withRepsAndWeight(actualReps + 1, actualWeight);
+        if (actual.rpe() > 0.0 && actual.rpe() <= UNDERSHOOT_RPE) {
+            return doubleJump(actual);
+        }
+
+        if (actualReps >= config.maxReps() + 2) {
+            return doubleJump(actual);
+        }
+
+        return actual;
+    }
+
+    public ProgressionConfig getConfig() {
+        return config;
+    }
+
+    private Exercise doubleJump(Exercise actual) {
+        double weight    = actual.weight();
+        double increment = Math.max(weight * 0.05, config.weightIncrementKg() * 2);
+        double newWeight = config.roundToIncrement(weight + increment);
+        return actual.withRepsAndWeight(config.minReps(), newWeight);
     }
 }

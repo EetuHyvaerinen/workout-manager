@@ -19,7 +19,7 @@ public class DBConnectionPool {
     private final long timeout;
     private final long maxLifetime = TimeUnit.HOURS.toMillis(7);
     private final LinkedBlockingQueue<ConnectionWrapper> pool;
-    private final ScheduledExecutorService healthChecker = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService healthChecker = Executors.newSingleThreadScheduledExecutor(Thread.ofPlatform().name("db-pool-health-checker").factory());
 
     private final LongAdder totalCreated = new LongAdder();
     private final LongAdder totalTimeouts = new LongAdder();

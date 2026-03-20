@@ -25,13 +25,14 @@ public class JsonMapper {
 
     public static boolean writeRecord(JsonWriter writer, Object value) {
         return switch (value) {
-            case Exercise(int id, String workoutId, String name, int reps, double weight, Instant created, Instant updated) -> {
+            case Exercise(int id, String workoutId, String name, int reps, double weight, double rpe, Instant created, Instant updated) -> {
                 writer.beginObject()
                         .field("id", id)
                         .field("workoutId", workoutId)
                         .field("name", name)
                         .field("repetitions", reps)
                         .field("weight", weight)
+                        .field("rpe", rpe)
                         .field("createdAt", created)
                         .field("updatedAt", updated)
                         .endObject();
@@ -214,6 +215,7 @@ public class JsonMapper {
                 n.str("name"),
                 n.integer("repetitions"),
                 n.dbl("weight"),
+                n.dbl("rpe"),
                 n.instant("createdAt"),
                 n.instant("updatedAt")
         );

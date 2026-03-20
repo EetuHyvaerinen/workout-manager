@@ -241,7 +241,7 @@ function renderWorkoutItem(data, isPlan) {
           <strong>${name}</strong>
           ${sets.map(s => `
             <div class="set-container">
-              <div>${s.repetitions} x ${s.weight}kg</div>
+              <div>${s.repetitions} x ${s.weight}kg ${s.rpe && s.rpe > 0 ? `@ RPE ${s.rpe}` : ''}</div>
             </div>
           `).join('')}
         </div>
@@ -287,7 +287,7 @@ window.startPlannedWorkout = function(planId) {
     addExerciseUI(name);
     const currentEx = exercises[exercises.length - 1];
     sets.forEach(s => {
-      currentEx.sets.push({ repetitions: s.repetitions, weight: s.weight });
+      currentEx.sets.push({ repetitions: s.repetitions, weight: s.weight, rpe: s.rpe || 0.0 });
     });
     renderSetsUI(currentEx.id);
   });
@@ -311,6 +311,7 @@ function addExerciseUI(name) {
       <div class="set-input-group">
         <input type="number" placeholder="Reps" class="s-reps">
         <input type="number" placeholder="Kg" class="s-weight">
+        <input type="number" placeholder="RPE" class="s-rpe" min="1" max="10" step="0.5">
         <button type="button" onclick="addSet('${id}', this)">+</button>
       </div>
     </div>
@@ -319,13 +320,17 @@ function addExerciseUI(name) {
 
   const repsInput = div.querySelector('.s-reps');
   const weightInput = div.querySelector('.s-weight');
+  const rpeInput = div.querySelector('.s-rpe');
   const addButton = div.querySelector('button');
 
   weightInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') { addSet(id, addButton); repsInput.focus(); }
+    if (e.key === 'Enter') { rpeInput.focus(); }
   });
   repsInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') weightInput.focus();
+  });
+  rpeInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { addSet(id, addButton); repsInput.focus(); }
   });
   repsInput.focus();
 }
@@ -334,14 +339,18 @@ window.addSet = function (id, btn) {
   const container = btn.parentElement;
   const reps = container.querySelector('.s-reps').value;
   const weight = container.querySelector('.s-weight').value;
+  const rpe = container.querySelector('.s-rpe').value;
+  
   if (!reps || !weight) return;
 
   const ex = exercises.find(e => e.id === id);
-  ex.sets.push({ repetitions: reps, weight: weight });
+  // Default to 0.0 if RPE is empty
+  ex.sets.push({ repetitions: reps, weight: weight, rpe: rpe ? parseFloat(rpe) : 0.0 });
   renderSetsUI(id);
 
   container.querySelector('.s-reps').value = '';
   container.querySelector('.s-weight').value = '';
+  container.querySelector('.s-rpe').value = '';
 };
 
 function renderSetsUI(exerciseId) {
@@ -349,7 +358,7 @@ function renderSetsUI(exerciseId) {
   const setList = document.getElementById(`sets-${exerciseId}`);
   setList.innerHTML = ex.sets.map((set, index) => `
     <div class="set-container create-workout">
-      <div>${set.repetitions} x ${set.weight}kg</div>
+      <div>${set.repetitions} x ${set.weight}kg ${set.rpe && set.rpe > 0 ? `@ RPE ${set.rpe}` : ''}</div>
       <button class="btn delete-x" onclick="deleteSet('${exerciseId}', ${index})">X</button>
     </div>
   `).join('');
@@ -393,7 +402,8 @@ createWorkoutBtn.addEventListener('click', () => {
     const exercisesPayload = exercises.flatMap(ex => ex.sets.map(s => ({
         name: ex.name,
         repetitions: parseInt(s.repetitions),
-        weight: parseFloat(s.weight)
+        weight: parseFloat(s.weight),
+        rpe: s.rpe ? parseFloat(s.rpe) : 0.0
     })));
 
     const payload = {
