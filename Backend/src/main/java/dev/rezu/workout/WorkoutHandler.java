@@ -83,9 +83,9 @@ public class WorkoutHandler extends BaseHandler {
         }
 
         if (path.endsWith("/plans/reschedule")) {
-            String planId = extractParameter(query, "planId");
-            String dateStr = extractParameter(query, "date");
-            workoutService.rescheduleWorkout(planId, Instant.parse(dateStr));
+            String planId = jsonNode.str("planId");
+            Instant date = jsonNode.instant("date");
+            workoutService.rescheduleWorkout(planId, date);
             ResponseMessage.send(exchange, 200, ResponseMessageType.MESSAGE, "Rescheduled successfully");
             return;
         }
@@ -96,8 +96,8 @@ public class WorkoutHandler extends BaseHandler {
             ResponseMessage.send(exchange, 201, "Plan saved");
         } else {
             Workout workout = jsonNode.map(JsonMapper::readWorkout);
-            workoutService.saveWorkoutByDate(workout, userId);
-            ResponseMessage.send(exchange, 201, "Workout saved");
+            String id = workoutService.saveWorkoutOrPlan(workout, userId);
+            ResponseMessage.send(exchange, 201, ResponseMessageType.DATA, Map.of("id", id));
         }
     }
 

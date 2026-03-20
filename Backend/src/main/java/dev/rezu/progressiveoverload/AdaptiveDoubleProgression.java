@@ -28,23 +28,22 @@ public class AdaptiveDoubleProgression implements ProgressionStrategy {
                 return doubleJump(actual);
             }
         }
-        return actual;
+        return normalProgression(actual);
     }
 
     @Override
     public Exercise calculateNext(Exercise actual, Exercise planned) {
-        int    actualReps  = actual.repetitions();
-        int    plannedReps = planned.repetitions();
-        double weight      = actual.weight();
+        int actualReps  = actual.repetitions();
+        int plannedReps = planned.repetitions();
+        double weight   = actual.weight();
+        double completionRate = (double) actualReps / plannedReps;
+
+        if (completionRate < config.deloadThresholdPct()) {
+            double deloadWeight = config.roundToIncrement(weight * config.deloadFactor());
+            return actual.withRepsAndWeight(config.minReps(), deloadWeight);
+        }
 
         if (actualReps < plannedReps) {
-            double completionRate = (double) actualReps / plannedReps;
-
-            if (completionRate < config.deloadThresholdPct()) {
-                double deloadWeight = config.roundToIncrement(weight * config.deloadFactor());
-                return actual.withRepsAndWeight(config.minReps(), deloadWeight);
-            }
-
             return actual.withRepsAndWeight(plannedReps, weight);
         }
 
@@ -60,7 +59,16 @@ public class AdaptiveDoubleProgression implements ProgressionStrategy {
             return doubleJump(actual);
         }
 
-        return actual;
+        return normalProgression(actual);
+    }
+
+    private Exercise normalProgression(Exercise actual) {
+        int nextReps = actual.repetitions() + 1;
+        if (nextReps > config.maxReps()) {
+            double newWeight = config.roundToIncrement(actual.weight() + config.weightIncrementKg());
+            return actual.withRepsAndWeight(config.minReps(), newWeight);
+        }
+        return actual.withRepsAndWeight(nextReps, actual.weight());
     }
 
     public ProgressionConfig getConfig() {

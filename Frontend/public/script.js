@@ -253,18 +253,16 @@ function renderWorkoutItem(data, isPlan) {
 }
 
 window.reschedulePlan = function(id, dateValue) {
-  if (!dateValue) return;
   const isoDate = new Date(dateValue).toISOString();
-  fetch(`https://hyvaerinen.com:8444/api/workout/plans/reschedule?planId=${id}&date=${isoDate}`, {
+  fetch(`http://localhost:8444/api/workout/plans/reschedule`, {
     method: 'POST',
-    credentials: 'include'
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ planId: id, date: isoDate })
   })
   .then(response => {
-    if (response.ok) {
-      fetchWorkouts();
-    } else {
-      console.error("Failed to reschedule workout");
-    }
+    if (response.ok) fetchWorkouts();
+    else console.error("Failed to reschedule workout");
   })
   .catch(err => console.error("Error during rescheduling:", err));
 };

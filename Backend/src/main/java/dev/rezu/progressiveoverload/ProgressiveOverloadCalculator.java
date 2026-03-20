@@ -6,8 +6,8 @@ import dev.rezu.workout.Workout;
 import dev.rezu.workout.WorkoutStatus;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 
 public class ProgressiveOverloadCalculator {
 
@@ -48,25 +48,36 @@ public class ProgressiveOverloadCalculator {
         );
     }
 
-    public PlannedWorkout getProgressiveOverloadForWorkout(Workout actualWorkout,
-                                                           PlannedWorkout plannedWorkout) {
+    public PlannedWorkout getProgressiveOverloadForWorkout(
+            Workout actualWorkout,
+            PlannedWorkout plannedWorkout) {
 
         List<Exercise> actualExercises  = actualWorkout.exercises();
         List<Exercise> plannedExercises = plannedWorkout.exercises();
 
-        if (actualExercises.size() != plannedExercises.size()) {
-            throw new IllegalArgumentException("Actual and planned workouts differ in exercise count");
+        Map<Integer, Exercise> plannedById = new HashMap<>();
+        for (Exercise planned : plannedExercises) {
+            plannedById.put(planned.id(), planned);
         }
 
-        List<Exercise> overloadedExercises =
-                java.util.stream.IntStream.range(0, actualExercises.size())
-                        .mapToObj(i -> getProgressiveOverloadForExercise(
-                                actualExercises.get(i),
-                                plannedExercises.get(i)
-                        ))
-                        .toList();
+        List<Exercise> overloadedExercises = new ArrayList<>();
 
-        Instant nextOccurrence = plannedWorkout.activateTime().plus(7, java.time.temporal.ChronoUnit.DAYS);
+        for (Exercise actual : actualExercises) {
+            Exercise planned = plannedById.get(actual.id());
+            if (planned != null) {
+                overloadedExercises.add(getProgressiveOverloadForExercise(actual, planned));
+            } else {
+                overloadedExercises.add(getProgressiveOverloadForExercise(actual));
+            }
+        }
+
+        for (Exercise planned : plannedExercises) {
+            if (actualExercises.stream().noneMatch(a -> a.id() == planned.id())) {
+                overloadedExercises.add(planned);
+            }
+        }
+
+        Instant nextOccurrence = plannedWorkout.activateTime().plus(7, ChronoUnit.DAYS);
 
         return new PlannedWorkout(
                 UUID.randomUUID().toString(),

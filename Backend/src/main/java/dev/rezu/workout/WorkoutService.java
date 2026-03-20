@@ -138,6 +138,16 @@ public class WorkoutService {
         }
     }
 
+    public String saveWorkoutOrPlan(Workout workout, int userId) {
+        Instant workoutDate = workout.createdAt();
+        if (workoutDate.isAfter(Instant.now())) {
+            PlannedWorkout plan = PlannedWorkout.fromWorkout(workout);
+            return savePlan(plan, userId);
+        } else {
+            return saveWorkoutByDate(workout, userId);
+        }
+    }
+
     public String saveWorkoutByDate(Workout workout, int userId) {
         try (PooledConnection conn = connectionManager.getConnection()) {
             conn.setAutoCommit(false);

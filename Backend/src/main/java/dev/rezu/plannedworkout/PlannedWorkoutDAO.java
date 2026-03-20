@@ -105,7 +105,7 @@ public class PlannedWorkoutDAO {
                 while (rs.next()) {
                     String pId = rs.getString("planned_workout_id");
                     map.computeIfAbsent(pId, _ -> new ArrayList<>()).add(new Exercise(
-                            0, pId, rs.getString("name"), rs.getInt("target_repetitions"), rs.getDouble("target_weight"),
+                            rs.getInt("id"), pId, rs.getString("name"), rs.getInt("target_repetitions"), rs.getDouble("target_weight"),
                             rs.getDouble("target_rpe")
                     ));
                 }

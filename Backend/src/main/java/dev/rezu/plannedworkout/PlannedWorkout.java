@@ -1,6 +1,7 @@
 package dev.rezu.plannedworkout;
 
 import dev.rezu.workout.Exercise;
+import dev.rezu.workout.Workout;
 import dev.rezu.workout.WorkoutStatus;
 
 import java.time.Instant;
@@ -31,6 +32,17 @@ public record PlannedWorkout(
                 WorkoutStatus.PLANNED,
                 null,
                 exercises
+        );
+    }
+    public static PlannedWorkout fromWorkout(Workout workout) {
+        return new PlannedWorkout(
+                UUID.randomUUID().toString(), // generate new ID for the plan
+                workout.userId(),
+                workout.name(),
+                workout.createdAt(),          // activateTime is the same as workout's date
+                WorkoutStatus.PLANNED,
+                null,                         // not completed yet
+                workout.exercises()           // copy exercises
         );
     }
 }
