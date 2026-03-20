@@ -4,6 +4,9 @@ A high-performance, dependency-free workout management system featuring a custom
 
 A live demo is available [here](https://www.hyvaerinen.com/workoutmanager/login?email=test@test&pass=testtest)
 
+
+![](images/workout-manager.png)
+
 ---
 
 ## Technical Specifications
